@@ -1,0 +1,151 @@
+package com.moa.mgr.controller;
+
+import java.util.Collection;
+
+import org.slf4j.LoggerFactory;
+
+import com.jfinal.aop.Before;
+import com.jfinal.core.Controller;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.result.obj.EmptyResultObj;
+import com.moa.mgr.service.LoanManService;
+import com.moa.mgr.service.loan.Bank;
+import com.moa.mgr.service.loan.BankLoader;
+import com.moa.mgr.service.loan.FiProd;
+import com.moa.mgr.service.loan.FiProdLoader;
+import com.moa.mgr.service.loan.LoanApplyResult;
+import com.moa.mgr.service.manager.ManagerCache;
+import com.moa.mgr.service.manager.ManagerInfo;
+
+/**
+ * 贷款控制器
+ * @author zf21100
+ *
+ */
+public class LoanManController extends Controller {
+	
+	private static final String TAG = "LoanController";
+	
+	
+	/** 产品列表 */
+	//@Before(TokenInterceptor.class)
+	public void prodList() {
+		ResultInfo<Collection<FiProd>> ret = new ResultInfo<Collection<FiProd>>(ResultCodes.RET_SUCCESS, "ok", FiProdLoader.getInstance().getFiProdList());
+		renderText(ret.toJsonIgnorPrivateAttr());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void prodList2() {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (optMgr.type == ManagerInfo.MGR_TYPE_BANK_MGR) {
+			ResultInfo<Collection<FiProd>> ret = new ResultInfo<Collection<FiProd>>(ResultCodes.RET_SUCCESS, "ok", FiProdLoader.getInstance().getProdsByBankId(optMgr.bankId));
+			renderText(ret.toJsonIgnorPrivateAttr());
+		} else {  //如果是系统管理员，可以查看所有贷款产品
+			ResultInfo<Collection<FiProd>> ret = new ResultInfo<Collection<FiProd>>(ResultCodes.RET_SUCCESS, "ok", FiProdLoader.getInstance().getFiProdList());
+			renderText(ret.toJsonIgnorPrivateAttr());
+		}
+	}
+	
+	/** 更新贷款产品 */
+	@Before(TokenInterceptor.class)
+	public void updateProd() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<EmptyResultObj>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.updateProd(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("update Prod error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	/** 金融机构列表 */
+	//@Before(TokenInterceptor.class)
+	public void bankList() {
+		ResultInfo<Collection<Bank>> ret = new ResultInfo<Collection<Bank>>(ResultCodes.RET_SUCCESS, "ok", BankLoader.getInstance().getAllBanks());
+		renderText(ret.toJson());
+	}
+	
+	public void prodDetail() {
+		ResultInfo<FiProd> ret = LoanManService.prodDetail(this);
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void loanApplyList() {
+		ResultInfo<LoanApplyResult> ret = new ResultInfo<LoanApplyResult>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.loanApplyList(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("query loan apply " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void loanApproval() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<EmptyResultObj>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.approval(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("approval error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void addBank() {
+		ResultInfo<Bank> ret = new ResultInfo<Bank>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.addBank(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("add bank error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void delBank() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<EmptyResultObj>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.delBank(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("add bank error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void addFiProd() {
+		ResultInfo<FiProd> ret = new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.addFiProd(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("add fiprod error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void delFiProd() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.delFiProd(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("delete fiprod error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	@Before(TokenInterceptor.class)
+	public void setFiProdStatus() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = LoanManService.setFiProdStatus(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("set fiprod status error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+}

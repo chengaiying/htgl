@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div id="frame_shade"></div>
+<div class="nav_link"><span class="nav_link_main">直报管理</span><span class="nav_link_page">/&nbsp;新增直报</span></div>
+<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+  <td align="right" nowrap class="form_item_name">表单名称</td>
+  <td nowrap class="form_item_input_td"><input type="text" value="" size="20" placeholder="" class="info_frame_input"></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">图标</td>
+  <td nowrap class="form_item_input_td"><select id="" title="" class="info_frame_select">
+    <option>图标1</option>
+    <option>图标1</option>
+    <option>图标2</option>
+    <option>图标3</option>
+    <option>图标4</option>
+    <option>图标5</option>
+    <option>图标6</option>
+    <option>图标7</option>
+    <option>图标8</option>
+    <option>图标9</option>
+</select><img id="J_imgHere" src="../img/nophoto.png" height="40px" /></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">简介</td>
+  <td nowrap class="form_item_input_td"><textarea name="" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">指引图</td>
+  <td nowrap class="form_item_input_td">
+  <input id="farmer_photo" class="info_frame_file" type="file" name="farmer_photo" onChange="ajaxfile();" maxlength="10"/><span id="J_photoReplace" class="form_input_file_img" ><img id="J_imgHere" src="../img/nophoto.png" height="40px" /></span>
+  </td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name" valign="top" style="padding-top:8px">字段列表</td>
+  <td nowrap class="form_item_input_td" valign="top">
+  
+ 
+  
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table"><tr class="data_frist_tr"><td>序号</td><td>组别</td>
+  <td>对象</td>
+  <td>显示名</td><td>字段名称</td><td>字段类型</td><td>必填</td><td>单位</td>
+  <td>小数点</td>
+  <td>下限</td>
+  <td>上限</td>
+  <td>选项数组</td>
+  <td>新增选项</td>
+  <td>分隔线</td>
+  <td>操作</td>
+</tr>
+  <tr>
+    <td>1</td>
+    <td>1</td>
+    <td>所有</td>
+    <td>人口</td>
+    <td>people</td>
+    <td>num</td>
+    <td>是</td>
+    <td>人</td>
+    <td>2</td>
+    <td>100</td>
+    <td>1000</td>
+    <td><a href="javascript:;" class="data_tb_btn"  onClick="popDivHandler(this);">查看</a>
+    
+    
+<div class="needPopDiv"><div class="PopContext" style="width:300px;margin-left:-150px;"><div class="PopTips"><div class="popTipHeader">选项列表</div><div class="phoneStyleDiv"><center>
+5w<br>
+10w<br>
+100w<br>
+
+</center>
+</div><center><a href="javascript:;"><div class="btn4" onClick="myBtnClick(this,'#ffffff','');popDivClose(this);"><div class="btn4_txt">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;"><div class="btn4" onClick="myBtnClick(this,'#ffffff','');popDivClose(this);"><div class="btn4_txt">关闭</div></div></a></center></div></div></div>	
+    
+    
+    
+    
+    
+    </td>
+    <td>-</td>
+    <td>无</td>
+    <td><a href="javascript:;" class="data_tb_btn"  onClick="popDivHandler(this);">删除</a></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><input type="text" value="" size="2" placeholder="" class="word_frame_input"></td>
+    <td><select id="" title="" class="word_frame_select">
+    <option>合作社</option>
+    <option>农场主</option>
+</select></td>
+    <td><input type="text" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><select id="" title="" class="word_frame_select">
+    <option>数字</option>
+    <option>字符</option>
+</select></td>
+    <td><label><input name="need" type="checkbox" value="1" /></label> </td>
+    <td><input type="text" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" value="" size="4" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><a href="javascript:;" class="data_tb_btn">查看</a></td>
+    <td><input type="text" value="" size="8" placeholder="" class="word_frame_input">&nbsp;<a href="javascript:;" class="data_tb_btn">确定</a></td>
+    <td><label><input name="need" type="checkbox" value="1" /></label></td>
+    <td><a href="javascript:;" class="data_tb_btn"  onClick="popDivHandler(this);">确定</a></td>
+  </tr>
+</table>
+
+<!--   <a href="javascript:;"><div class="btn5" onClick="myBtnClick(this,'#ffffff','');"><div class="btn5_txt">新增空白行</div></div></a>  -->
+  
+<br />  <br />  
+  
+  
+  
+  
+  
+  </td>
+</tr>
+<tr>
+  <td nowrap>&nbsp;</td>
+  <td nowrap class="form_item_input_td"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">确定</div></div></a></td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  </tr>
+</table>
+
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

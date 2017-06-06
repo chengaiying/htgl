@@ -1,0 +1,542 @@
+package com.moa.mgr.service;
+
+import java.io.File;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.druid.util.StringUtils;
+import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.WebConfig4Mgr;
+import com.moa.mgr.common.Utils;
+import com.moa.mgr.db.Tables.TBank;
+import com.moa.mgr.db.Tables.TFiProd;
+import com.moa.mgr.db.Tables.TLoanApply;
+import com.moa.mgr.db.Tables.TRegion;
+import com.moa.mgr.model.AlipayUserModel;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.result.obj.EmptyResultObj;
+import com.moa.mgr.service.loan.Bank;
+import com.moa.mgr.service.loan.BankLoader;
+import com.moa.mgr.service.loan.FiProd;
+import com.moa.mgr.service.loan.FiProdLoader;
+import com.moa.mgr.service.loan.LoanApplyResult;
+import com.moa.mgr.service.manager.ManagerCache;
+import com.moa.mgr.service.manager.ManagerInfo;
+import com.moa.mgr.service.manager.Permission;
+
+/**
+ * 贷款模块管理
+ * @author zf21100
+ *
+ */
+public class LoanManService {
+	
+	public static final int NUM_PER_PAGE = 50;
+	
+	private static final String PARAM_APPLY_ID = "apply_id";
+	
+	private static final String PARAM_OPT_CODE = "opt_code";
+	
+	public static final String PARAM_BANK_NAME = "bank_name";
+	
+	private static final String TAG = "LoanManService";
+	
+	/**
+	 * 产品详细信息
+	 * @param controller
+	 * @return
+	 */
+	public static ResultInfo<FiProd> prodDetail(Controller controller) {
+		String prodId = controller.getPara(TFiProd.COL_ID);
+		if (Utils.isEmpty(prodId)) {
+			return new ResultInfo<FiProd>(ResultCodes.RET_PARAM_ERROR, "id cannot be empty");
+		}
+		FiProd prod = FiProdLoader.getInstance().findProd(prodId);
+		if (prod == null) {
+			return new ResultInfo<FiProd>(ResultCodes.RET_DATA_NOT_EXIST, "no data");
+		}
+		return new ResultInfo<FiProd>(ResultCodes.RET_SUCCESS, "ok", prod);
+	}
+	
+	public static ResultInfo<LoanApplyResult> loanApplyList(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		
+		boolean scanAllLoanAppliedPer = optMgr.checkPermission(Permission.PERMISSION_SCAN_ALL_LOAN_APPLIES);
+		if (! scanAllLoanAppliedPer){
+			if (! optMgr.checkPermission(Permission.PERMISSION_SCAN_LOAN_APPLIES) || optMgr.bankId == 0) {
+				return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+			}
+		}
+		int page = 1;
+		try {
+			page = controller.getParaToInt("page");
+		} catch (Exception e) {
+			
+		}
+		LoanApplyResult result = new LoanApplyResult();
+		result.page = page;
+		int startIndex = (page - 1) * NUM_PER_PAGE;
+		List<Record> recordList = null;
+		String prod_name=controller.getPara("prod_name");
+		String bdate=controller.getPara("bdate");
+		String edate=controller.getPara("edate");
+		Record ctRecord = null;
+		List<Object> paramCount = new ArrayList<>();
+		List<Object> paramList = new ArrayList<>();
+		if (scanAllLoanAppliedPer) {
+			//具有500权限的用户查看贷款列表
+			if(optMgr.type==4){
+				//具有500权限的用户查看贷款列表,地区管理员需要根据区域控制他查看贷款列表的范围				
+				Record regionRecord = Db.findFirst("select * from region where region_id =?", optMgr.regionId);
+				// 判断regionRecord是省-市-县（区）
+				if (!regionRecord.get(TRegion.COL_PARENT_ID).toString().trim()
+						.equals("0")) {
+					Record cityRecord = Db.findFirst(
+							"select * from region where region_code =?",
+							regionRecord.get(TRegion.COL_PARENT_ID));
+					if (!cityRecord.get(TRegion.COL_PARENT_ID).toString().trim()
+							.equals("0")) {
+						// 县级管理员权限
+						String district = regionRecord.get(TRegion.COL_REGION_NAME).toString();
+						String sqlCount=getSql("select count(1) count from v_loan_apply where  district=? \n", prod_name, bdate, edate, "");
+						
+						if (!StringUtils.isEmpty(district)) {
+							paramCount.add(district);
+							paramList.add(district);
+						}
+						if (!StringUtils.isEmpty(prod_name)) {
+							paramCount.add("%" + prod_name + "%");
+							paramList.add("%" + prod_name + "%");
+						}
+						if (!StringUtils.isEmpty(bdate)) {
+							paramCount.add(bdate );
+							paramList.add(bdate );
+						}
+						if (!StringUtils.isEmpty(edate)) {
+							paramCount.add(edate);
+							paramList.add(edate );
+						}
+						ctRecord = Db.findFirst(sqlCount,paramCount.toArray());
+						
+						String sqlList=getSql("select * from v_loan_apply where province=? \n",prod_name, bdate, edate,"limit ?, ? ");
+						paramList.add(startIndex);
+						paramList.add(NUM_PER_PAGE);
+						recordList = Db.find(sqlList, paramList.toArray());
+					} else {
+						//市级管理员权限
+					String	city = regionRecord.get(TRegion.COL_REGION_NAME).toString();
+					String sqlCount=getSql("select count(1) count from v_loan_apply where  city=? \n", prod_name, bdate, edate, "");
+					
+					if (!StringUtils.isEmpty(city)) {
+						paramCount.add(city);
+						paramList.add(city);
+					}
+					if (!StringUtils.isEmpty(prod_name)) {
+						paramCount.add("%" + prod_name + "%");
+						paramList.add("%" + prod_name + "%");
+					}
+					if (!StringUtils.isEmpty(bdate)) {
+						paramCount.add(bdate );
+						paramList.add(bdate );
+					}
+					if (!StringUtils.isEmpty(edate)) {
+						paramCount.add(edate);
+						paramList.add(edate );
+					}
+					ctRecord = Db.findFirst(sqlCount,paramCount.toArray());
+					
+					String sqlList=getSql("select * from v_loan_apply where province=? \n",prod_name, bdate, edate,"limit ?, ? ");
+					paramList.add(startIndex);
+					paramList.add(NUM_PER_PAGE);
+					recordList = Db.find(sqlList, paramList.toArray());
+					
+					}
+				} else {
+					//省级管理员权限
+					String province = regionRecord.get(TRegion.COL_REGION_NAME).toString();
+					String sqlCount=getSql("select count(1) count from v_loan_apply where  province=? \n", prod_name, bdate, edate, "");
+				
+					if (!StringUtils.isEmpty(province)) {
+						paramCount.add(province);
+						paramList.add(province);
+					}
+					if (!StringUtils.isEmpty(prod_name)) {
+						paramCount.add("%" + prod_name + "%");
+						paramList.add("%" + prod_name + "%");
+					}
+					if (!StringUtils.isEmpty(bdate)) {
+						paramCount.add(bdate );
+						paramList.add(bdate );
+					}
+					if (!StringUtils.isEmpty(edate)) {
+						paramCount.add(edate);
+						paramList.add(edate );
+					}
+					ctRecord = Db.findFirst(sqlCount,paramCount.toArray());
+					
+					String sqlList=getSql("select * from v_loan_apply where province=? \n",prod_name, bdate, edate,"limit ?, ? ");
+					paramList.add(startIndex);
+					paramList.add(NUM_PER_PAGE);
+					recordList = Db.find(sqlList, paramList.toArray());
+				}
+			}else{
+				//具有500权限的用户查看贷款列表
+				String sqlCount=getSql("select count(1) count from v_loan_apply where  1=1 \n", prod_name, bdate, edate, "");
+
+				if (!StringUtils.isEmpty(prod_name)) {
+					paramCount.add("%" + prod_name + "%");
+					paramList.add("%" + prod_name + "%");
+				}
+				if (!StringUtils.isEmpty(bdate)) {
+					paramCount.add(bdate );
+					paramList.add(bdate );
+				}
+				if (!StringUtils.isEmpty(edate)) {
+					paramCount.add(edate);
+					paramList.add(edate );
+				}
+				ctRecord = Db.findFirst(sqlCount,paramCount.toArray());
+				
+				String sqlList=getSql("select * from v_loan_apply where 1=1 \n",prod_name, bdate, edate,"limit ?, ? ");
+				paramList.add(startIndex);
+				paramList.add(NUM_PER_PAGE);
+				recordList = Db.find(sqlList, paramList.toArray());
+			}
+		} else {
+			if(optMgr.type==3){
+				String sqlCount=getSql("select count(1) count from v_loan_apply where  bank_id=? \n", prod_name, bdate, edate, "");
+				paramCount.add(optMgr.bankId );
+				paramList.add(optMgr.bankId );
+				if (!StringUtils.isEmpty(prod_name)) {
+					paramCount.add("%" + prod_name + "%");
+					paramList.add("%" + prod_name + "%");
+				}
+				if (!StringUtils.isEmpty(bdate)) {
+					paramCount.add(bdate );
+					paramList.add(bdate );
+				}
+				if (!StringUtils.isEmpty(edate)) {
+					paramCount.add(edate);
+					paramList.add(edate );
+				}
+				ctRecord = Db.findFirst(sqlCount,paramCount.toArray());
+				
+				String sqlList=getSql("select * from v_loan_apply where bank_id=? \n",prod_name, bdate, edate,"limit ?, ? ");
+				paramList.add(startIndex);
+				paramList.add(NUM_PER_PAGE);
+				recordList = Db.find(sqlList, paramList.toArray());
+			}
+		}
+		long ct = ctRecord.getLong("count");
+		result.totalPage = ct / NUM_PER_PAGE + (long)((ct % NUM_PER_PAGE) == 0 ? 0 : 1);
+		
+		if (recordList != null) {
+			for (Record tmp : recordList) {
+				result.applies.add(tmp.getColumns());
+			}
+		}
+		
+		return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok", result);
+	}
+	
+	public static ResultInfo<EmptyResultObj> approval(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (! optMgr.checkPermission(Permission.PERMISSION_APPROVAL_LOAN_APPLY) || optMgr.bankId == 0) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+		
+		String applyId = controller.getPara(PARAM_APPLY_ID);
+		if (Utils.isEmpty(applyId)) {
+			return new ResultInfo<>(ResultCodes.RET_DATA_NOT_EXIST, "数据不存在");
+		}
+		int optCode = -1;
+		try {
+			optCode = controller.getParaToInt(PARAM_OPT_CODE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Record applyRecord = Db.findFirst("select * from loan_apply where id=?", applyId);
+		if (applyRecord == null) {
+			return new ResultInfo<>(ResultCodes.RET_DATA_NOT_EXIST, "申请记录不存在");
+		}
+		/*	int status = applyRecord.getInt(TLoanApply.COL_STATUS);
+		if (! checkOpt(status, optCode)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "不支持该操作");
+		}*/
+		String deny_reason=controller.getPara("refusalReason");
+		if (!Utils.isEmpty(applyId)) {
+			applyRecord.set(TLoanApply.COL_REASON, deny_reason);
+		}
+		applyRecord.set(TLoanApply.COL_STATUS, optCode);
+		applyRecord.set(TLoanApply.COL_MODIFY_DATE, Utils.getCurrentTimeStr());
+		//applyRecord中新增modify(修改者)字段
+		applyRecord.set(TLoanApply.COL_MODIFY,optMgr.userName);
+		
+		try {
+			if (Db.update(TLoanApply.TABLE_NAME, TLoanApply.COL_ID, applyRecord)) {
+				return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok");
+			}
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("贷款审批错误 id:" + applyId + ", optCode:" + optCode + ", " + e.getMessage());
+		}
+		return new ResultInfo<>(ResultCodes.RET_FAILED, "审批失败");	
+	}
+	
+	//0-待处理 1-拒绝 2-用户取消 3-同意  4-贷款完成
+	private static boolean checkOpt(int status, int optCode) {
+		switch (optCode) {
+		case 0:
+		case 2:
+			return false;			//待处理为初始状态，用户取消为用户发起的操作，管理员不能进行该操作
+		case 1:
+		case 3:
+			return status == 0;		//待处理状态，可以进行拒绝和同意操作
+		case 4:
+			return status == 3;		//同意状态，可以进行完成操作
+		default:
+			return false;
+		}
+	}
+	
+	
+	public static ResultInfo<Bank> addBank(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (! optMgr.checkPermission(Permission.PERMISSION_ADD_BANK)) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+		
+		String bankName = controller.getPara(PARAM_BANK_NAME);
+		if (Utils.isEmpty(bankName)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "金融机构名称不能为空");
+		}
+		int type = -1;
+		try {
+			type = controller.getParaToInt("type");
+		} catch (Exception e) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "金融机构类型填写错误");
+		}
+		
+		
+		
+		String tmpFileName = optMgr.findTmpFileName("bank_icon");
+	    if (Utils.isEmpty(tmpFileName)) {
+	      return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "请重新上传机构图标");
+	    }
+	    
+	    File tmpFile = new File(tmpFileName);
+	    if (! tmpFile.isFile()) {
+	      return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "请重新上传机构图标");
+	    }
+	    String newFileName =  tmpFile.getName();
+	    String newFilePath = WebConfig4Mgr.bankDir + File.separator  + newFileName;
+	    if (! tmpFile.renameTo(new File(newFilePath))) {
+	      return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "请重新上传机构图标");
+	    }
+		
+		Record newIdRecord = Db.findFirst("select max(id)+1 as newId from bank");
+		long newId = newIdRecord.getLong("newId");
+		
+		Record newBank = new Record();
+		newBank.set(TBank.COL_BANK_NAME, bankName);
+		newBank.set(TBank.COL_BANK_TYPE, type);
+		newBank.set(TBank.COL_BANK_ICON, "bank/" + newFileName);
+		newBank.set(TBank.COL_ID, newId);
+		newBank.set(TBank.COL_BANK_DESC, controller.getPara(TBank.COL_BANK_DESC));
+		newBank.set(TBank.COL_PROVINCE, controller.getPara(TBank.COL_PROVINCE));
+		newBank.set(TBank.COL_CITY, controller.getPara(TBank.COL_CITY));
+		newBank.set(TBank.COL_DISTRICT, controller.getPara(TBank.COL_DISTRICT));
+		
+		//创建人
+		newBank.set(TBank.COL_CREATEOR, optMgr.userName);
+		
+		try {
+			if (Db.save(TBank.TABLE_NAME, newBank)) {
+				optMgr.removeTmpFile("bank_icon");
+				Bank bankObj = new Bank((int) newId, bankName, type, "bank/" + newFileName, controller.getPara(TBank.COL_BANK_DESC), 1000, controller.getPara(TBank.COL_PROVINCE), controller.getPara(TBank.COL_CITY), controller.getPara(TBank.COL_DISTRICT));
+				BankLoader.getInstance().addBank(bankObj);
+				ReloaderService.reload(ReloaderService.OPT_CODE_UPDATE_BANK);
+				return new ResultInfo<Bank>(ResultCodes.RET_SUCCESS, "ok", bankObj);
+			} else {
+				Utils.deleteFileByName(newFilePath);
+			}
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("add bank error:" + e.getMessage());
+			Utils.deleteFileByName(newFilePath);
+		}
+		
+		return new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR, "error");
+	}
+	
+	public static ResultInfo<EmptyResultObj> delBank(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (! optMgr.checkPermission(Permission.PERMISSION_DEL_BANK)) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+		int bankId = -1;
+		try {
+			bankId = controller.getParaToInt("bank_id");
+		} catch (Exception e) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "金融机构id填写错误");
+		}
+		
+		int ct = Db.update("delete from bank where id=?", bankId);
+		if (ct == 1) {
+			Bank delBank = BankLoader.getInstance().removeBank(bankId);
+			if (delBank != null) {
+				delBank.deleteIcon();
+			}
+			
+			List<FiProd> list = FiProdLoader.getInstance().removeProdsByBankId(bankId);
+			for (FiProd prod : list) {
+				if (Utils.isEmpty(prod.prodIcon)) {
+					continue;
+				}
+				Utils.deleteFileByName(WebConfig4Mgr.rootDir + File.separator + prod.prodIcon);
+			}
+			
+			FiProdLoader.getInstance().loadFiProds();
+			ReloaderService.reload(ReloaderService.OPT_CODE_UPDATE_BANK);
+			ReloaderService.reload(ReloaderService.OPT_CODE_UPDATE_FI_PROD);
+			
+			return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok");
+		}
+		
+		return new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR, "error");
+	}
+	
+	public static ResultInfo<FiProd> addFiProd(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (! optMgr.checkPermission(Permission.PERMISSION_ADD_FIPROD) || optMgr.bankId == 0) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+		
+		//产品名称和产品联系人不能为空
+		if (controller.isParaBlank(TFiProd.COL_PROD_NAME) || controller.isParaBlank(TFiProd.COL_CONTACT)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "参数错误");
+		}
+		//查找上传过的产品图标
+		String prodIconFilePath = optMgr.findTmpFileName("fiprod_icon");
+		if (Utils.isEmpty(prodIconFilePath)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "请上传金融产品图标");
+		}
+		
+		File tmpFile = new File(prodIconFilePath);
+		if (! tmpFile.isFile()) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "请上传金融传产品图标");
+		}
+		
+		if (! tmpFile.renameTo(new File(WebConfig4Mgr.fiProdDir + File.separator + tmpFile.getName()))) {
+			tmpFile.delete();
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "请上传金融传产品图标");
+		}
+		
+		Record record = new Record();
+		String id = optMgr.bankId + ":" + Utils.createUUID();
+		record.set(TFiProd.COL_ID, id);
+		record.set(TFiProd.COL_BANK_ID, optMgr.bankId);
+		record.set(TFiProd.COL_PROD_NAME, controller.getPara(TFiProd.COL_PROD_NAME));
+		record.set(TFiProd.COL_PROD_DESC, controller.getPara(TFiProd.COL_PROD_DESC));
+		record.set(TFiProd.COL_PROD_CONTENT, controller.getPara(TFiProd.COL_PROD_CONTENT));
+		record.set(TFiProd.COL_RATE, controller.getPara(TFiProd.COL_RATE));
+		record.set(TFiProd.COL_CONTACT, controller.getPara(TFiProd.COL_CONTACT));
+		record.set(TFiProd.COL_CREATE_DATE, Utils.getCurrentTimeStr());
+		record.set(TFiProd.COL_PROD_ICON, "fi_prod/" + tmpFile.getName());
+		record.set(TFiProd.COL_STATUS, 0);
+		//创建人
+		record.set(TFiProd.COL_CREATEOR, optMgr.userName);
+		record.set(TFiProd.COL_PROVINCE, controller.getPara(TFiProd.COL_PROVINCE));
+		record.set(TFiProd.COL_CITY, controller.getPara(TFiProd.COL_CITY));
+		record.set(TFiProd.COL_DISTRICT, controller.getPara(TFiProd.COL_DISTRICT));
+		
+		
+		if (Db.save(TFiProd.TABLE_NAME, record)) {
+			record.set(TFiProd.COL_ID, id);
+			FiProd newProd = FiProd.createProd(record);
+			FiProdLoader.getInstance().addProd(newProd);
+			ReloaderService.reload(ReloaderService.OPT_CODE_UPDATE_FI_PROD);
+			return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok", newProd); 
+		} 
+		
+		return new ResultInfo<>(ResultCodes.RET_FAILED); 
+	}
+	
+	public static ResultInfo<EmptyResultObj> delFiProd(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (! optMgr.checkPermission(Permission.PERMISSION_DEL_FIPROD) || optMgr.bankId == 0) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+		
+		String prodId = controller.getPara(TLoanApply.COL_PROD_ID);
+		if (Utils.isEmpty(prodId)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "产品id不能为空");
+		}
+		
+		int ct = Db.update("delete from fi_prod where id=? and bank_id=?", prodId, optMgr.bankId);
+		if (ct < 1) {
+			return new ResultInfo<>(ResultCodes.RET_FAILED, "产品删除失败");
+		}
+		
+		ReloaderService.reload(ReloaderService.OPT_CODE_UPDATE_FI_PROD);
+		FiProd delProd = FiProdLoader.getInstance().removeProd(prodId);
+		if (delProd != null) {
+			if (Utils.isEmpty(delProd.prodIcon)) {
+				Utils.deleteFileByName(WebConfig4Mgr.rootDir + File.separator + delProd.prodIcon);
+			}
+		}
+		return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok");
+	} 
+	
+	public static ResultInfo<EmptyResultObj> setFiProdStatus(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		//需要新增商品或删除商品权限，且必须为该商品所属机构管理员
+		if (! optMgr.checkPermission(Permission.PERMISSION_UPDATE_FIPROD) || optMgr.bankId == 0) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+		
+		int status = controller.getParaToInt(TFiProd.COL_STATUS);
+		if (status != 0 && status != -1) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "产品状态错误");
+		}
+		
+		String prodId = controller.getPara(TLoanApply.COL_PROD_ID);
+		if (Utils.isEmpty(prodId)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "产品id不能为空");
+		}
+		//修改参数新增modify和modify_time字段
+		int ct = Db.update("update fi_prod set status=?,modify_time=?,modify=? where id=? and bank_id=? and status != ? ", status,Timestamp.valueOf(Utils.getCurrentTimeStr()),optMgr.userName, prodId, optMgr.bankId, status);
+		if (ct < 1) {
+			return new ResultInfo<>(ResultCodes.RET_FAILED, "操作失败");
+		}
+		FiProd prod = FiProdLoader.getInstance().findProd(prodId);
+		if (prod != null) {
+			prod.status = status;
+		}
+		ReloaderService.reload(ReloaderService.OPT_CODE_UPDATE_FI_PROD);
+		return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok");
+	}
+	private static String getSql(String sql1,String prod_name,String bdate,String edate,String sql2) {
+		StringBuilder sql=new StringBuilder();
+		sql.append(sql1);
+			if(!StringUtils.isEmpty(prod_name)){
+			sql.append("and prod_name like ?  ");
+			}
+			if(!StringUtils.isEmpty(bdate)){
+				sql.append("and apply_date >= ?  ");
+				}
+			if(!StringUtils.isEmpty(edate)){
+				sql.append("and apply_date <= ?  ");
+			}
+			sql.append(sql2);
+		
+
+		return sql.toString();
+	}
+}

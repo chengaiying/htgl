@@ -1,0 +1,459 @@
+package com.moa.mgr.service;
+
+import java.sql.SQLException;
+import java.util.UUID;
+
+import com.alibaba.druid.util.StringUtils;
+import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.upload.UploadFile;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.WebConfig4Mgr;
+import com.moa.mgr.common.ExcelReader;
+import com.moa.mgr.common.Utils;
+import com.moa.mgr.db.Tables.TAlipayUser;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.result.obj.EmptyResultObj;
+import com.moa.mgr.service.manager.ManagerCache;
+import com.moa.mgr.service.manager.ManagerInfo;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+
+import org.apache.log4j.Logger;
+
+public class UserService {
+	static Logger logger = Logger.getLogger(UserService.class);
+	public static ResultInfo<EmptyResultObj> addUser(final Controller controller) {
+		 final ManagerInfo optMgr = ManagerCache.getInstance().findManager(
+				controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		if (optMgr.type != ManagerInfo.MGR_TYPE_ADMIN
+				&& optMgr.type != ManagerInfo.MGR_TYPE_SYS) {
+			return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+		}
+
+		String idNum = controller.getPara(TAlipayUser.COL_ID);
+		String phone = controller.getPara(TAlipayUser.COL_CONTACT);
+		String isHzs = controller.getPara(TAlipayUser.COL_IS_HZS);
+		String farmer = controller.getPara(TAlipayUser.COL_FARMER);
+		String farmName = controller.getPara(TAlipayUser.COL_FARM_NAME);
+		String type = controller.getPara("add_type");
+		try {
+			if (type.equals("0")) {
+				if (Utils.isEmpty(idNum) || Utils.isEmpty(phone)
+						|| Utils.isEmpty(farmer) || Utils.isEmpty(isHzs)) {
+					return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR);
+				}
+				// 判断身份证是否存在，存在则提示异常
+				Record idRecord = Db
+						.findFirst(
+								"SELECT COUNT(*) AS size FROM ALIPAY_USER WHERE ID_NUM=? AND IS_HZS=? ",
+								idNum, 0);
+
+				if (Integer.parseInt(idRecord.get("size").toString().trim()) > 0) {
+					return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR,
+							"农场主身份证信息（" + idNum + "）已存在,请联系管理员");
+				}
+
+				if (!Utils.checkCellphoneFormat(phone)) {
+					return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR,
+							"手机号码格式错误");
+				}
+
+				if (!isHzs.equals("0") && !isHzs.equals("1")) {
+					return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR,
+							"农场主类型错误");
+				}
+				Record record = new Record();
+				record.set(TAlipayUser.COL_ID, idNum);
+				record.set(TAlipayUser.COL_CONTACT, phone);
+				record.set(TAlipayUser.COL_IS_HZS, isHzs);
+				record.set(TAlipayUser.COL_FARMER, farmer);
+				record.set(TAlipayUser.COL_FARM_NAME, farmName);
+				// 创建人
+				record.set(TAlipayUser.COL_CREATEOR, optMgr.userName);
+
+				if (Db.save(TAlipayUser.TABLE_NAME, TAlipayUser.COL_ID, record)) {
+					return new ResultInfo<>(ResultCodes.RET_SUCCESS, "新增用户成功");
+				}else{
+					
+					return new ResultInfo<>(ResultCodes.RET_FAILED, "fail");	
+				}
+			}else{
+			
+				UploadFile	uploadFile1 = controller.getFile("file");
+			
+				final UploadFile uploadFile = uploadFile1;
+				
+				boolean bool = Db.tx(new IAtom() {
+					public boolean run() throws SQLException {
+						
+						boolean bool=true;
+						// 解析excel
+						ExcelReader ExcelData = new ExcelReader(uploadFile.getFile()
+								.getPath(), "Sheet1");
+						// Excel中数据判断是否是合作社
+						for (int i = 1; i < ExcelData.getLastRowNum(); i++) {
+							if((ExcelData.getCellData(i, "经营者身份证号") != null)&& (!ExcelData.getCellData(i, "经营者身份证号").equals(""))){
+							   checkExcelParam(i,ExcelData.getCellData(i, "经营者身份证号"),ExcelData.getCellData(i, "经营者电话号码"),ExcelData.getCellData(i, "家庭农场名称"),ExcelData.getCellData(i, "经营者名称"));
+								String idNum = ExcelData.getCellData(i, "经营者身份证号").toString().trim();
+								String phone = ExcelData.getCellData(i, "经营者电话号码").toString().trim();
+								String farmerName = ExcelData.getCellData(i, "家庭农场名称").toString().trim();
+								String farmer= ExcelData.getCellData(i, "经营者名称").toString().trim();
+
+								// 判断excel中身份证信息是否已存在
+								Record excelDataRecord = Db
+										.findFirst(
+												"SELECT count(*) as size FROM ALIPAY_USER WHERE ID_NUM=? AND IS_HZS=? ",
+												idNum, 0);
+								if (Integer.parseInt(excelDataRecord.get("size")
+										.toString().trim()) > 0) {
+							    throw new SQLException("excel中第"+ i+ "行导入的农场主身份证信息（"+idNum+ "）已存在,请联系管理员");
+								}
+								Record record = new Record();
+								record.set(TAlipayUser.COL_ID,idNum);
+								record.set(TAlipayUser.COL_CONTACT,phone);
+								record.set(TAlipayUser.COL_IS_HZS, 0);
+								// 经营者名称
+								record.set(TAlipayUser.COL_FARMER,farmer);
+								record.set(TAlipayUser.COL_FARM_NAME,farmerName);
+								// 创建者名称
+								record.set(TAlipayUser.COL_CREATEOR, optMgr.userName);
+
+							bool=Db.save(TAlipayUser.TABLE_NAME, TAlipayUser.COL_ID,
+										record);
+
+							}	
+						}
+						
+						return bool;
+			
+				
+			} 
+					
+				});
+				
+				if(bool){
+					return new ResultInfo<>(ResultCodes.RET_SUCCESS,"ok");	
+				}else{
+				
+					return new ResultInfo<>(ResultCodes.RET_FAILED, "fail");
+				}
+				
+				}
+			
+		} catch (Exception e) {
+			String message="";
+			logger.error("系统异常:"+e);
+            e.printStackTrace();
+            if(e.getMessage().contains("java.sql.SQLException:")){
+				 message=e.getMessage().replaceAll("java.sql.SQLException:", "");
+			}else{
+				message="未知异常";
+			}
+			return new ResultInfo<>(ResultCodes.RET_FAILED, message);
+		}
+	}
+
+	public static ResultInfo<EmptyResultObj> saveAlipayUser(
+			Controller controller) {
+		final String farmerName = controller.getPara("farmer_name");
+
+		final String cFarmer = controller.getPara("lsz_user");
+
+		final String cFarmerIdNum = controller.getPara("lsz_text");
+
+		final String cContact = controller.getPara("lsz_contact");
+
+		final String aFarmer = controller.getPara("dlr_user");
+
+		final String aFarmerIdNum = controller.getPara("dlr_text");
+
+		final String aContact = controller.getPara("dlr_contact");
+
+		final String type = controller.getPara("add_type");
+		UploadFile uploadFile1 = null;
+		if (type == null) {
+			uploadFile1 = controller.getFile("file");
+		}
+		final UploadFile uploadFile = uploadFile1;
+		try {
+			boolean bool = Db.tx(new IAtom() {
+				public boolean run() throws SQLException {
+					if (type == null) {
+						ExcelReader ExcelData = new ExcelReader(uploadFile
+								.getFile().getPath(), "Sheet1");
+
+						for (int i = 1; i < ExcelData.getLastRowNum(); i++) {
+							if ((ExcelData.getCellData(i, "合作社名称") != null)
+									&& (!ExcelData.getCellData(i, "合作社名称")
+											.equals(""))) {
+								UserService.checkParam(i,ExcelData);
+
+								Record cAliUserRecord = new Record();
+								cAliUserRecord.set("farm_name",ExcelData.getCellData(i, "合作社名称"));
+								cAliUserRecord.set("farmer",ExcelData.getCellData(i, "理事长名称"));
+								cAliUserRecord.set("id_num",ExcelData.getCellData(i, "理事长身份证"));
+								cAliUserRecord.set("contact",ExcelData.getCellData(i, "理事长电话号码"));
+								cAliUserRecord.set("is_authed",Integer.valueOf(0));
+								cAliUserRecord.set("is_hzs", Integer.valueOf(1));
+								cAliUserRecord.set("farmer_type",Integer.valueOf(2));
+								Db.save("alipay_user", cAliUserRecord);
+                                
+								Record idRecord = Db.findFirst("SELECT LAST_INSERT_ID() as id");
+
+								Record aCAliUserRecord = new Record();
+								aCAliUserRecord.set("farm_name",ExcelData.getCellData(i, "合作社名称"));
+								aCAliUserRecord.set("farmer",ExcelData.getCellData(i, "代理人名称"));
+								aCAliUserRecord.set("id_num",ExcelData.getCellData(i, "代理人身份证"));
+								aCAliUserRecord.set("contact",ExcelData.getCellData(i, "代理人电话号码"));
+								aCAliUserRecord.set("is_authed",Integer.valueOf(0));
+								aCAliUserRecord.set("is_hzs",Integer.valueOf(1));
+								aCAliUserRecord.set("farmer_type",Integer.valueOf(2));
+
+								aCAliUserRecord.set("principal_Id",
+										idRecord.get("id"));
+								Db.save("alipay_user", aCAliUserRecord);
+							}
+						}
+
+					} else if ((farmerName != null) && (farmerName != "")) {
+						Record cRecord = new Record();
+						cRecord.set("farm_name", farmerName);
+						cRecord.set("farmer", cFarmer);
+						cRecord.set("id_num", cFarmerIdNum);
+						cRecord.set("contact", cContact);
+						cRecord.set("is_authed", Integer.valueOf(0));
+						cRecord.set("is_hzs", Integer.valueOf(1));
+						cRecord.set("farmer_type", Integer.valueOf(2));
+						Db.save("alipay_user", cRecord);
+
+						if ((aFarmer != null) && (aFarmer != "")) {
+							Record record = Db
+									.findFirst("SELECT LAST_INSERT_ID() as id");
+
+							Record aRecord = new Record();
+							aRecord.set("farm_name", farmerName);
+							aRecord.set("farmer", aFarmer);
+							aRecord.set("id_num", aFarmerIdNum);
+							aRecord.set("contact", aContact.toString());
+							aRecord.set("is_authed", Integer.valueOf(0));
+							aRecord.set("is_hzs", Integer.valueOf(1));
+							aRecord.set("farmer_type", Integer.valueOf(2));
+							aRecord.set("principal_Id", record.get("id"));
+							Db.save("alipay_user", aRecord);
+						}
+					}
+
+					return true;
+				}
+			});
+			if (bool) {
+				return new ResultInfo<EmptyResultObj>(ResultCodes.RET_SUCCESS,
+						"ok");
+			}
+
+			return new ResultInfo<EmptyResultObj>(ResultCodes.RET_FAILED,
+					"fail");
+		} catch (Exception e) {
+			String message="";
+			logger.error(""+e.getMessage()); 
+			e.printStackTrace();
+			if(e.getMessage().contains("java.sql.SQLException:")){
+				 message=e.getMessage().replaceAll("java.sql.SQLException:", "");
+			}else{
+				message="未知异常";
+			}
+			return new ResultInfo<EmptyResultObj>(ResultCodes.RET_FAILED,message);
+		}
+
+	}
+
+	//xf updated by 20170414
+	public static ResultInfo<EmptyResultObj> addFarm(Controller controller) {
+		 final ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+			if (optMgr.type != ManagerInfo.MGR_TYPE_ADMIN
+					&& optMgr.type != ManagerInfo.MGR_TYPE_SYS) {
+				return new ResultInfo<>(ResultCodes.RET_NO_PERMISSION, "无权限");
+			}
+			
+			String idNum = controller.getPara(TAlipayUser.COL_ID);
+			String phone = controller.getPara(TAlipayUser.COL_CONTACT);
+			String isHzs = controller.getPara(TAlipayUser.COL_IS_HZS);
+			String farmer = controller.getPara(TAlipayUser.COL_FARMER);
+			String farmName = controller.getPara(TAlipayUser.COL_FARM_NAME);
+			String type = controller.getPara("add_type");
+			try {
+				if (type.equals("0")) {
+					if (Utils.isEmpty(farmer) || Utils.isEmpty(isHzs)) {
+						return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR);
+					}
+					Record record = new Record();
+					record.set(TAlipayUser.COL_ID, idNum);
+					record.set(TAlipayUser.COL_CONTACT, phone);
+					record.set(TAlipayUser.COL_IS_HZS, isHzs);
+					record.set(TAlipayUser.COL_FARMER, farmer);
+					record.set(TAlipayUser.COL_FARM_NAME, farmName);
+					// 创建人
+					record.set(TAlipayUser.COL_CREATEOR, optMgr.userName);
+					if (Db.save(TAlipayUser.TABLE_NAME, TAlipayUser.COL_ID, record)) {
+						return new ResultInfo<>(ResultCodes.RET_SUCCESS, "新增用户成功");
+					} else {
+						return new ResultInfo<>(ResultCodes.RET_FAILED, "fail");
+					}
+				}else{
+					UploadFile	uploadFile1 = controller.getFile("file");
+					final UploadFile uploadFile = uploadFile1;
+					boolean bool = Db.tx(new IAtom() {
+						public boolean run() throws SQLException {
+							boolean bool=true;
+							// 解析excel
+							ExcelReader ExcelData = new ExcelReader(uploadFile.getFile()
+									.getPath(), "Sheet1");
+							// Excel中数据判断是否是养殖场
+							for (int i = 1; i < ExcelData.getLastRowNum(); i++) {
+								if((ExcelData.getCellData(i, "身份证号") != null)&& (!ExcelData.getCellData(i, "手机号码").equals(""))){
+								    checkExcelParam(i,ExcelData.getCellData(i, "身份证号"),ExcelData.getCellData(i, "手机号码"),ExcelData.getCellData(i, "养殖场（小区）名称"),ExcelData.getCellData(i, "姓名"));
+									String idNum = ExcelData.getCellData(i, "身份证号").toString().trim();
+									String phone = ExcelData.getCellData(i, "手机号码").toString().trim();
+									String farmerName = ExcelData.getCellData(i, "养殖场（小区）名称").toString().trim();
+									String farmer= ExcelData.getCellData(i, "姓名").toString().trim();
+									// 判断excel中身份证信息是否已存在
+									Record excelDataRecord = Db
+											.findFirst(
+													"SELECT count(*) as size FROM ALIPAY_USER WHERE ID_NUM=? AND IS_HZS=? ",
+													idNum, 2);
+									if (Integer.parseInt(excelDataRecord.get("size")
+											.toString().trim()) > 0) {
+										throw new SQLException("excel中第"+ i+ "行导入的养殖场身份证信息（"+idNum+ "）已存在,请联系管理员");
+									}
+									Record record = new Record();
+									record.set(TAlipayUser.COL_ID,idNum);
+									record.set(TAlipayUser.COL_CONTACT,phone);
+									record.set(TAlipayUser.COL_IS_HZS,2);
+									// 养殖场名称
+									record.set(TAlipayUser.COL_FARMER,farmer);
+									record.set(TAlipayUser.COL_FARM_NAME,farmerName);
+									// 创建者名称
+									record.set(TAlipayUser.COL_CREATEOR, optMgr.userName);
+									bool=Db.save(TAlipayUser.TABLE_NAME, TAlipayUser.COL_ID, record);
+								}
+							}
+							return bool;
+						}
+					});
+					if(bool){
+						return new ResultInfo<>(ResultCodes.RET_SUCCESS, "ok");
+					}else{
+						return new ResultInfo<>(ResultCodes.RET_FAILED, "fail");
+					}				
+				}
+			} catch (Exception e) {
+				String message="";
+				logger.error("系统异常:"+e);
+	            e.printStackTrace();
+	            if(e.getMessage().contains("java.sql.SQLException:")){
+					 message=e.getMessage().replaceAll("java.sql.SQLException:", "");
+				}else{
+					message="未知异常";
+				}
+				return new ResultInfo<>(ResultCodes.RET_FAILED, message);
+			}
+	}
+	
+	/**
+	 * 关键参数校验
+	 * 
+	 * @throws Exception
+	 **/
+	private static void checkParam(int i,ExcelReader excelData) throws SQLException {
+		
+		String farmName=excelData.getCellData(i,"合作社名称");
+		String cIdNum=excelData.getCellData(i,"理事长身份证");
+		String cFarmer=excelData.getCellData(i,"理事长名称");
+		String cContact=excelData.getCellData(i,"理事长电话号码"); 
+		String aIdNum=excelData.getCellData(i,"代理人身份证");
+		String aFarmer=excelData.getCellData(i,"代理人名称");
+		String aContact=excelData.getCellData(i,"代理人电话号码");		
+		
+		// 合作社名称校验
+		if (StringUtils.isEmpty(farmName)) {
+			throw new SQLException("Excel中导入的第"+(i+1)+"行,合作社名称不能为空");
+		}
+		// 理事长名称非空验证
+		if (StringUtils.isEmpty(cFarmer)) {
+			throw new SQLException("Excel中导入的第"+(i+1)+"行,理事长名称不能为空");
+		}
+		// 理事长名称非空验证
+		if (StringUtils.isEmpty(aFarmer)) {
+			throw new SQLException("Excel中导入的第"+(i+1)+"行,代理人名称不能为空");
+		}
+		
+		if(!StringUtils.isEmpty(cIdNum) && !cIdNum.equals("")){
+			//理事长身份证号码格式校验
+			if(!Utils.checkCellIdNumFormat(cIdNum)){
+				throw new SQLException("Excel中导入的第"+(i+1)+"行,理事长身份证号格式校验异常");	
+			}
+		}
+		if(!StringUtils.isEmpty(aIdNum)&& !aIdNum.equals("")){
+			//代理人身份证号码格式校验
+			if(!Utils.checkCellIdNumFormat(aIdNum)){
+				throw new SQLException("Excel中导入的第"+(i+1)+"行,代理人身份证格号式校验异常");	
+			}
+		}
+		if(!StringUtils.isEmpty(cContact)&& !cContact.equals("")){
+			//理事长电话号码格式校验
+			if(!Utils.checkCellphoneFormat(cContact)){
+				throw new SQLException("Excel中导入的第"+(i+1)+"行,理事长手机号格式校验异常");	
+			}
+		}
+		if(!StringUtils.isEmpty(aContact)&& !aContact.equals("")){
+			//代理人电话号码格式校验
+			if(!Utils.checkCellphoneFormat(aContact)){
+				throw new SQLException("Excel中导入的第"+(i+1)+"行,代理人手机号式校验异常");	
+			}
+		}
+	}
+	/**
+	 * 农场主信息校验
+	 * @throws Exception 
+	 */
+	public static void checkExcelParam(int i, String idNum, String phone,
+			String farmerName,String farmer) throws SQLException {
+		// 农场主身份证信息不能为空
+		if (Utils.isEmpty(idNum)) {
+
+			throw new SQLException("Excel中导入的第" +(i+1)+ "行身份证信息" + idNum + "为空");
+		}
+		// 农场主身份证格式校验
+		if (!Utils.checkCellIdNumFormat(idNum.toString().trim())) {
+
+			throw new SQLException("Excel中导入的第" + (i+1)+ "行,身份证信息(" + idNum + ")格式错误");
+		}
+		// 农场主手机号码不能为空
+		if (Utils.isEmpty(phone)) {
+
+			throw new SQLException("Excel中导入的第" + (i+1) + "行，手机号码不能为空");
+		}
+		// 农场主名称不能为空
+		if (Utils.isEmpty(farmer)) {
+
+			throw new SQLException("Excel中导入的第" + (i+1)+ "行，经营者名称不能为空");
+		}
+		// 农场主名称不能为空
+		if (Utils.isEmpty(farmerName)) {
+
+			throw new SQLException("Excel中导入的第" +(i+1) + "行，家庭农场名称不能为空");
+		}
+		// 手机格式校验
+		if (!Utils.checkCellphoneFormat(phone)) {
+			throw new SQLException("Excel中导入的第" +(i+1) + "行，手机号码格式错误");
+		}
+
+	}
+}

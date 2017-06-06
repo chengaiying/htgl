@@ -1,0 +1,276 @@
+@charset "utf-8";
+/* CSS Document */
+
+#frame_content{
+	padding:10px 20px 10px 20px;
+}
+
+.nav_link{
+	padding-bottom:10px;
+}
+
+.nav_link_main{
+	color: #00aaee;
+	font-size: 22px;
+	margin-right: 5px;
+	font-weight: bold;
+}
+
+.nav_link_page{
+	font-size:14px;
+}
+
+/*表格样式0*/
+.data_table{
+	border-top:solid 1px #dddddd;
+	border-left:solid 1px #dddddd;
+}
+
+.data_table td{
+	border-right:solid 1px #dddddd;
+	border-bottom:solid 1px #dddddd;
+	padding:5px 5px 5px 5px;
+	text-align:center;
+	color:#535353;
+	white-space:nowrap
+}
+
+.data_frist_tr,.data_frist_tr td{
+	background-color:#f5f5f5;
+	color:#444444;
+	text-wrap:none;
+	white-space:nowrap
+
+}
+
+/*表格样式1*/
+.data_tb1_table{
+	border-top:solid 1px #dddddd;
+	border-left:solid 1px #dddddd;
+	border-right:solid 1px #dddddd;
+}
+
+.data_tb1_hd{
+	background-color:#f5f5f5;
+	color:#444444;
+	text-wrap:none;
+	text-align:center;
+	padding:5px 5px 5px 5px;
+	border-bottom:solid 1px #dddddd;
+}
+
+.data_tb1{
+	border-bottom:solid 1px #dddddd;
+	padding:5px 5px 5px 5px;
+	text-align:left;
+	color:#535353;
+}
+
+.data_tb_rb{
+	border-right:solid 1px #dddddd;
+}
+
+.data_tb_lb{
+	border-left:solid 1px #dddddd;
+}
+
+.data_tb_btn,.data_tb_btn a{
+	color:#535353;
+	padding:0px 4px 0px 4px;
+	background-color:#f0f0f0;
+	border:solid 1px #dddddd;
+}
+
+.data_tb_btn1,.data_tb_btn1 a{/*红色按钮*/
+	color:#fff;
+	padding:0px 4px 0px 4px;
+	background-color:#ff6b6b;
+	border:solid 1px #ffc5c5;
+}
+
+.data_tb_btn2,.data_tb_btn2 a{/*绿色按钮*/
+	color:#fff;
+	padding:0px 4px 0px 4px;
+	background-color:#64c920;
+	border:solid 1px #83d84a;
+}
+
+/*表单选项*/
+.info_frame_select{
+	border:solid 1px #ddd;
+	color:#535353;
+	font-size:16px;
+	padding:10px 10px 10px 10px;
+	margin-right:20px;
+}
+
+.info_frame_select option:nth-child(even){
+	background-color:#f5f5f5; 
+}
+
+.info_frame_input{
+	border:solid 1px #dddddd;
+	color:#535353;
+	font-size:16px;
+	padding:10px 10px 10px 10px;
+	margin-right:20px;
+}
+
+.info_frame_date{
+	border:solid 1px #dddddd;
+	color:#535353;
+	font-size:16px;
+	padding:8px 10px 8px 10px;
+	margin-right:20px;
+}
+
+.info_frame_file{
+	border:solid 1px #535353;
+	color:#535353;
+	font-size:16px;
+	padding:7px 10px 7px 10px;
+	margin:0 20px 0 0;
+}
+
+.info_frame_textarea{
+	border:solid 1px #dddddd;
+	color:#535353;
+	font-size:16px;
+	padding:10px 10px 10px 10px;
+	margin-right:20px;
+}
+
+.info_check_group{
+	font-size:16px;
+	background-color:#fafafa;
+	padding:10px 0px 10px 10px;
+	margin-right:20px;
+}
+
+.form_item_name{
+	font-size:16px;
+	padding-right:10px;
+	font-weight:bold;
+	padding-left:20px;
+}
+
+.form_item_input_td{
+	padding:10px 0 10px 0;
+}
+
+/*字段表单选项*/
+.word_frame_input{
+	border:solid 1px #dddddd;
+	color:#535353;
+	font-size:16px;
+	padding:2px 2px 2px 2px;
+}
+
+.word_frame_select{
+	border:solid 1px #dddddd;
+	color:#535353;
+	font-size:16px;
+	padding:2px 2px 2px 2px;
+}
+
+.word_frame_select option:nth-child(even){
+	background-color:#f5f5f5; 
+}
+
+/*贷款*/
+.loan_operate{
+}
+
+.loan_operate img{
+	height:17px;
+	vertical-align:top;
+	padding:3px 2px 0px 0px;
+}
+
+.stats_table{
+	border:solid 1px #e5e5e5;
+	padding:10px 10px 10px 10px;
+}
+
+/*弹出背景*/
+#frame_shade{
+	display:none;
+	position:fixed;
+	z-index:100;
+	width:100%;
+	height:100%;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	background-color:#000;
+	
+	filter:alpha(opacity=10); /*IE滤镜，透明度50%*/
+	-moz-opacity:0.1; /*Firefox私有，透明度50%*/
+	opacity:0.1;/*其他，透明度50%*/	
+}
+
+.needPopDiv{
+	display:none;
+	position:fixed;
+	z-index:101;
+	width:100%;
+	height:100%;
+	left:0;
+	right:0;
+	top:0;
+	bottom:0;
+}
+
+.PopContext{
+	z-index: 102;
+    position: fixed;
+    /* top: 150px; */
+    overflow-y: auto;
+    height: 600px;
+    left: 50%;
+    position: fixed;
+    top: 0px;
+    /* left: 0px; */
+    /* right: 0px; */
+    bottom: 0px;
+    margin: auto;
+    width: 600px;
+    margin-left: -300px;
+    box-shadow: 0 0 10px #999;
+    background-color: #fff;
+    padding: 10px 10px 10px 10px;
+}
+
+.PopTips{
+	text-align: left;
+	border: solid 1px #e5e5e5;
+	padding: 10px 10px 10px 10px;
+	line-height: 150%;
+	white-space: normal;
+}
+
+.popTipHeader{
+	text-align:center;
+	border-bottom:solid 1px #e5e5e5;
+	font-weight:bold;
+	padding:0 0 10px 0;
+	margin-bottom:10px;
+}
+
+.phoneStyleDiv h1{
+	font: normal 16px "微软雅黑";
+	color:#333;
+	line-height:100%;
+	padding:0;
+	margin:10px 0px 4px 0px;
+}
+
+.phoneStyleDiv p{
+	font: normal 14px "微软雅黑";
+	color:#666;
+	line-height:100%;
+	padding:0px 0px 10px 0px;
+	margin:0px 0px 0px 0px;
+	border-bottom: dashed 1px #e5e5e5;
+}

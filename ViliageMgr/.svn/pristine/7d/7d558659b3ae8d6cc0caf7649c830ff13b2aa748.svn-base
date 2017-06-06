@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">大数据统计</span><span class="nav_link_page">/&nbsp;用户特征分布</span></div>
+
+
+
+
+
+<br />
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr align="left">
+    <td><div id="main_echarts1" style="width:1024px;height:400px; margin-bottom:20px" class="stats_table"></div></td>
+    
+  </tr>
+  <tr><td><div id="main_echarts2" style="width:1024px;height:400px" class="stats_table"></div></td></tr>
+</table>
+
+
+
+<script type="text/javascript">
+var date=new Date;
+ var year=date.getFullYear(); 
+// 基于准备好的dom，初始化echarts实例
+var myChart = echarts.init(document.getElementById('main_echarts1'),'macarons');
+var arr=[];
+var arr1=[];
+$.ajax({
+                      type : "post",
+                      async : false, //同步执行
+                      url : "/ViliageMgr/api/admin/countReport/userAge",
+                      data : {},
+                      dataType : "json", //返回数据形式为json
+                      success : function(value) {
+	                      result=value.result; 	
+	                      for(var key in result){
+	                        arr.push(key);
+	                        arr1.push(result[key]);
+	                      }                                  
+                      }
+                                   
+                    });
+option = {
+    color: ['#3398DB'],
+	title : {
+        text: '农场主年龄段分布情况',
+        subtext: year,
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+        }
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis : [
+        {
+            type : 'category',
+            data :arr,
+            axisTick: {
+                alignWithLabel: true
+            }
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value'
+        }
+    ],
+    series : [
+        {
+            name:'此年龄段人数',
+            type:'bar',
+            barWidth: '60%',
+            data:arr1,
+        }
+    ]
+};
+
+
+myChart.setOption(option);
+</script>
+
+<script type="text/javascript">
+// 基于准备好的dom，初始化echarts实例
+var myChart = echarts.init(document.getElementById('main_echarts2'),'macarons');
+var arr2=[];
+var names=[];
+var keys=[];
+									$.ajax({
+                      type : "post",
+                      async : false, //同步执行
+                      url : "/ViliageMgr/api/admin/countReport/educationCount",
+                      data : {},
+                      dataType : "json", //返回数据形式为json
+                      success : function(value) {
+	                      result=value.result; 		
+	                      for(var key in result){
+	                      	names.push(key);
+	                      	keys.push(result[key])
+	                      }
+	                      for (var i=0;i<=names.length-1;i++) {
+														
+														arr2.push(new ObjStory1(keys[i],names[i]));
+													}               	                  
+                      }                                                              
+                  });
+option = {
+    title : {
+        text: '农场主教育学历分布情况',
+        subtext: year,
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'left',
+        data: names
+    },
+    series : [
+        {
+            name: '百分比',
+            type: 'pie',
+            radius : '55%',
+            center: ['50%', '60%'],
+            data:arr2,
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+};
+
+myChart.setOption(option);
+
+function ObjStory1(name,value) //声明对象
+{
+    this.value = name;
+    this.name= value;
+}
+</script>
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">贷款管理</span><span class="nav_link_page">/&nbsp;新增贷款产品</span></div>
+<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+  <td width="30%" align="right" nowrap class="form_item_name">银行</td>
+  <td nowrap class="form_item_input_td"><input type="text" value="" size="20" placeholder="" class="info_frame_input"></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">产品名称</td>
+  <td nowrap class="form_item_input_td"><input type="text" value="" size="20" placeholder="" class="info_frame_input"></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">产品图标</td>
+  <td nowrap class="form_item_input_td">
+  <input id="farmer_photo" class="info_frame_file" type="file" name="farmer_photo" onChange="ajaxfile();" maxlength="10"/><span id="J_photoReplace" class="form_input_file_img" ><img id="J_imgHere" src="../img/nophoto.png" width="40px" /></span>
+  </td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">收件人</td>
+  <td nowrap class="form_item_input_td"><input type="text" value="" size="20" placeholder="" class="info_frame_input"></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">汇率</td>
+  <td nowrap class="form_item_input_td"><input type="text" value="" size="20" placeholder="" class="info_frame_input"></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">简介</td>
+  <td nowrap class="form_item_input_td"><textarea name="" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+</tr>
+<tr>
+  <td nowrap>&nbsp;</td>
+  <td nowrap class="form_item_input_td"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">确定</div></div></a></td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  </tr>
+</table>
+
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

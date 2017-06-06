@@ -1,0 +1,100 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">管理员管理</span><span class="nav_link_page">/&nbsp;管理员列表</span></div>
+
+
+
+<br />
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td>序号</td>
+    <td>类型</td>
+    <td>机构</td>
+    <td>用户名</td>
+    <td>联系方式</td>
+    <td>操作</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>超级管理员</td>
+    <td>系统</td>
+    <td>admin</td>
+    <td>15072455411</td>
+    <td><a href="javascript:;" class="data_tb_btn">删除</a>&nbsp;<a href="javascript:;" class="data_tb_btn">修改密码</a></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>机构管理员</td>
+    <td>中国农业银行</td>
+    <td>abc_admin</td>
+    <td>13895221565</td>
+    <td><a href="javascript:;" class="data_tb_btn">删除</a>&nbsp;<a href="javascript:;" class="data_tb_btn">修改密码</a>&nbsp;<a href="javascript:;" onClick="alert('123456')" class="data_tb_btn">权限</a></td>
+  </tr>
+</table>
+
+
+
+<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%" style="border:solid 1px #dddddd;">
+<tr>
+  <td colspan="4" class="data_tb1_hd">新增管理员</td>
+  </tr>
+<tr><td class="data_tb1" width="1%" nowrap>
+  	<select id="" title="" class="info_frame_select">
+        <option>类型</option>
+        <option>超级管理员</option>
+        <option>普通管理员</option>
+        <option>机构管理员</option>
+    </select>
+    <select id="" title="" class="info_frame_select">
+      <option>机构</option>
+      <option>系统</option>
+      <option>农业银行</option>
+      <option>邮储</option>
+    </select>  
+        <input type="text" value="" size="15" placeholder="请输入用户" class="info_frame_input">
+        <input type="password" value="" size="15" placeholder="设置密码" class="info_frame_input">
+      <input type="text" value="" size="20" placeholder="联系方式" class="info_frame_input">
+  </td>
+  <td class="data_tb1"><div class="info_check_group">权限设置
+    <label><input name="user_auth" type="checkbox" value="" />直报</label> 
+    <label><input name="user_auth" type="checkbox" value="" />贷款</label> 
+    <label><input name="user_auth" type="checkbox" value="" />大数据</label> 
+    <label><input name="user_auth" type="checkbox" value="" />系统设置</label>
+    </div></td>
+  <td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">新增</div></div></a>
+  </td>
+  <td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn2" onClick="myBtnClick(this,'#e6e6e6','');"><div class="btn2_txt">查询</div></div></a></td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+</table>
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

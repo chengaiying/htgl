@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">贷款管理</span><span class="nav_link_page">/&nbsp;贷款申请信息</span></div>
+
+
+<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+<tr>
+  <td colspan="2" class="data_tb1_hd">搜索条件</td>
+  </tr>
+<tr><td class="data_tb1" width="1%" nowrap>
+  <input type="date" value="" size="15" placeholder="请输入起始时间" class="info_frame_input">
+  <input type="date" value="" size="15" placeholder="请输入结束时间" class="info_frame_input">
+</td>
+  <td class="data_tb1"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">搜索</div></div></a>
+  </td>
+  </tr>
+<tr>
+  <td></td>
+  <td></td>
+  </tr>
+</table>
+
+
+<br />
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td>序号</td>
+    <td>贷款产品名<br>
+      [申请提交时间]</td>
+    <td>农场主<br>
+      [身份证号]</td>
+    <td>农场主存留手机</td>
+    <td>农场名称</td>
+    <td>申请额度</td>
+    <td>贷款期限</td>
+    <td>贷款用途</td>
+    <td>联系方式</td>
+    <td>当前状态</td>
+    <td>操作</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>农户小额贷款<br>
+      [2016.09.21]</td>
+    <td>张三<br>
+      [420222198635202144]</td>
+    <td>15072455411</td>
+    <td>浙江义乌家庭农场</td>
+    <td>5万元</td>
+    <td>12个月</td>
+    <td>&nbsp;</td>
+    <td>15076522589</td>
+    <td>审核中</td>
+    <td><a href="javascript:;" class="data_tb_btn">通过审核</a>&nbsp;<a href="javascript:;" class="data_tb_btn">拒绝</a></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>创业补助贷款<br>
+      [2016.09.22]</td>
+    <td>李四<br>
+      [420256896363250021]</td>
+    <td>13895221565</td>
+    <td>山东蓬莱家庭农场</td>
+    <td>10万元</td>
+    <td>18个月</td>
+    <td>&nbsp;</td>
+    <td>13896525587</td>
+    <td>已审核</td>
+    <td><a href="javascript:;" class="data_tb_btn">完成发放</a>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>农户大额贷款<br>
+      [2016.09.25]</td>
+    <td>王五五<br>
+      [225668126985263012]</td>
+    <td>13589522696</td>
+    <td>湖北荆门家庭农场</td>
+    <td>100万元</td>
+    <td>24个月</td>
+    <td>&nbsp;</td>
+    <td>12586936223</td>
+    <td>已拒绝</td>
+    <td><a href="javascript:;" class="data_tb_btn">删除</a>&nbsp;</td>
+  </tr>
+</table>
+
+<br />
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-right:10px;">
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">上一页</div></div></a>
+</td><td>
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">下一页</div></div></a>
+</td><td width="99%" align="right">
+<span class="txt1">第3页/共5页</span>
+</td></tr></table>
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="./css/style.css" rel="stylesheet" type="text/css" />
+		<link href="./css/html.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="css/personal.css" />
+
+		<script src="./js/jquery-2.1.4.min.js"></script>
+		<script src="./js/buttonStyle.js"></script>
+		<!--<script src="js/iframe.js" type="text/javascript" charset="utf-8"></script>-->
+		<style>
+			.span {
+				font-size: 14px;
+				display: inline-block;
+				border-bottom: 1px solid gray;
+				width: 180px;
+				padding: 10px;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="SiteHeader">
+			<span class="SiteHeaderLeft">
+				<img src="img/home.png">
+				<a href="index.html">农业部新型经营主体直报系统</a>
+			</span>
+
+			<!--  <span class="SiteHeaderRight">
+<a href="javascript:;" onClick="Logout();"><img src="img/android-exit.png">退出登陆</a></span>
+
+
+<span></span>
+	-->
+			<div id="MT_nav" class="clearfix">
+				<ul>
+					<li class="MT-item MT-last">
+						<a hidefocus="true" class="MT-bg" target="main_iframe">
+							个人中心
+						</a>
+						<div>
+							<span id="welcome_title" class="SiteHeaderRightWlc span" style="float: none;">欢迎您，访客！</span>
+							<!--<a href="./html/admin_info.html" target="main_iframe"  class="MT-list-last">个人信息</a>-->
+							<a href="../man/changePassword.html" class="MT-list-last" target="main_iframe">修改密码</a>
+						</div>
+					</li>
+					<li class="MT-item MT-last">
+						<a href="login.html" hidefocus="true" class="MT-bg">
+							<img src="img/android-exit.png">
+							<span>退出登录</span>
+						</a>
+					</li>
+				</ul>
+
+			</div>
+
+			<!--  
+<span id="welcome_title" class="SiteHeaderRightWlc">欢迎你，访客！</span>
+-->
+		</div>
+		<!--SiteHeader -->
+
+		<div id="SiteMiddle">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr valign="top">
+					<td id="NavMenu">
+						<div id="menu1" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/android-person.png">管理员管理</a>
+							</div>
+							<ul id="menu_1" class="nav_menu_sub">
+								<li id="menu_1_1">
+									<a href="./html/admin_info.html" target="main_iframe">管理员列表</a>
+								</li>
+								<li id="menu_1_4">
+									<a href="./html/admin_insurance.html" target="main_iframe">保险列表</a>
+								</li>
+								<li id="menu_1_2">
+									<a href="./html/admin_org.html" target="main_iframe">机构列表</a>
+								</li>
+								<li id="menu_1_3">
+									<a href="welcome.html" target="main_iframe">新增经营主体</a>
+								</li>
+							</ul>
+						</div>
+
+						<div id="menu2" class="nav_menu" id="nav_menu_form">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/document-text.png">直报管理</a>
+							</div>
+							<ul id="menu_2" class="nav_menu_sub">
+								<li id="menu_2_1">
+									<a href="./html/form_list.html" target="main_iframe">字段维护</a>
+								</li>
+								<li id="menu_2_2">
+									<a href="./html/form_info.html" target="main_iframe">直报信息</a>
+								</li>
+								<li id="menu_2_3">
+									<a href="./html/form_stat.html" target="main_iframe">上报统计</a>
+								</li>
+								<li id="menu_2_4">
+									<a href="./html/form_alipay_user.html" target="main_iframe">基础信息</a>
+								</li>
+							</ul>
+						</div>
+
+						<div id="menu3" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/stats.png">统计报表</a>
+							</div>
+							<ul id="menu_3" class="nav_menu_sub">
+								<li id="menu_3_1">
+									<a href="./html_/stats_reg.html" target="main_iframe">注册数据</a>
+								</li>
+								<li id="menu_3_2">
+									<a href="./html_/stats_user.html" target="main_iframe">特征分布数据</a>
+								</li>
+								<li id="menu_3_3">
+									<a href="./html_/stats_peixun.html" target="main_iframe">培训情况</a>
+								</li>
+								<li id="menu_3_4">
+									<a href="building.html" target="main_iframe">劳动力情况</a>
+								</li>
+								<li id="menu_3_5">
+									<a href="./html_/stats_tudiguimo.html" target="main_iframe">土地经营情况</a>
+								</li>
+								<li id="menu_3_6">
+									<a href="building.html" target="main_iframe">土地来源</a>
+								</li>
+								<li id="menu_3_7">
+									<a href="building.html" target="main_iframe">租金水平</a>
+								</li>
+
+							</ul>
+						</div>
+
+						<div id="menu4" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/card.png">贷款管理</a>
+							</div>
+							<ul id="menu_4" class="nav_menu_sub">
+								<li id="menu_4_1">
+									<a href="./html/loan_list.html" target="main_iframe">贷款产品</a>
+								</li>
+								<li id="menu_4_2">
+									<a href="./html/loan_info.html" target="main_iframe">贷款申请列表</a>
+								</li>
+								<li id="menu_4_3">
+									<a href="building.html" target="main_iframe">统计报表</a>
+								</li>
+							</ul>
+						</div>
+						
+						<div id="menu8" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/cog.png">保险管理</a>
+							</div>
+							<ul id="menu_8" class="nav_menu_sub">
+								<li id="menu_8_1">
+									<a href="html/insurance_product.html" target="main_iframe">保险产品</a>
+								</li>
+								<li id="menu_8_2">
+									<a href="html/insurance_product_info.html" target="main_iframe">保险申请列表</a>
+								</li>
+							</ul>
+						</div>
+						
+						<div id="menu7" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/card.png">新闻管理</a>
+							</div>
+							<ul id="menu_7" class="nav_menu_sub">
+								<li id="menu_7_1">
+									<a href="html/news_release.html" target="main_iframe">新闻发布</a>
+								</li>
+								<li id="menu_7_2">
+									<a href="html/news_list.html" target="main_iframe">新闻列表</a>
+								</li>
+							</ul>
+						</div>
+
+						<div id="menu5" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/chatbox-working.png">我要培训</a>
+							</div>
+							<ul id="menu_5" class="nav_menu_sub">
+								<li id="menu_5_2">
+									<a href="html/training_course.html" target="main_iframe">培训课程</a>
+								</li>
+								<li id="menu_5_1">
+									<a href="html/message_list.html" target="main_iframe">留言列表</a>
+								</li>
+							</ul>
+						</div>
+
+						<div id="menu6" class="nav_menu">
+							<div class="type_name" onClick="navClick(this);">
+								<a href="javascript:;"><img src="img/gear.png">系统管理</a>
+							</div>
+							<ul id="menu_6" id="adminman" class="nav_menu_sub">
+								<li id="menu_6_1">
+									<a href="building.html" target="main_iframe">系统设置</a>
+								</li>
+								<li id="menu_6_2">
+									<a href="building.html" target="main_iframe">系统日志</a>
+								</li>
+							</ul>
+						</div>
+						<br /><br />
+					</td>
+					<!--NavMenu -->
+
+					<td id="SiteContent">
+						‍<iframe src="./html/form_info.html" id="main_iframe" name="main_iframe" width="100%" frameborder="0" scrolling="yes" marginwidth="0" marginheight="0"></iframe>
+					</td>
+					<!--SiteContent -->
+				</tr>
+			</table>
+		</div>
+		<!--SiteMiddle -->
+
+		<div id="SiteFooter">
+			<a>©&nbsp;直报管理平台&nbsp;.&nbsp;版权信息</a>
+		</div>
+		<!--SiteFooter -->
+
+	</body>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var type = localStorage.getItem("type");
+
+			var userName = localStorage.getItem("user_name");
+			var type = localStorage.getItem("type");
+			var userPermStr = localStorage.getItem("user_permissions"); //取回变量  
+			var userPermissions = JSON.parse(userPermStr); //把字符串转换成JSON对象  
+			$("#welcome_title").html("欢迎您，" + userName + "！");
+
+			$.each(userPermissions, function(idx, value) {
+
+				if(value.id == 300) {
+					$("#nav_menu_form").show();
+
+				}
+			});
+
+			if(type == "1") { //超级管理员
+				$("#menu1").show();
+				$("#menu2").show();
+				$("#menu3").show();
+				$("#menu4").show();
+				$("#menu5").show();
+				$("#menu6").show();
+				$("#menu7").show();
+				$("#main_iframe").attr({
+					"src": "./html/admin_info.html"
+				});
+			} else if(type == "2") { //系统管理员
+				$("#menu1").show();
+				$("#menu2").show();
+				$("#menu3").show();
+				$("#menu4").show();
+				$("#menu5").show();
+				$("#menu6").show();
+				$("#menu1").hide();
+				$("#menu7").show();
+				$("#menu8").show();
+				$("#main_iframe").attr({
+					"src": "./html/form_list.html"
+				});
+			} else if(type == "3") { //机构管理员
+				$("#menu1").hide();
+				$("#menu2").hide();
+				$("#menu3").hide();
+				$("#menu5").hide();
+				$("#menu6").hide();
+				$("#menu7").hide();
+				$("#menu8").hide();
+				$("#main_iframe").attr({
+					"src": "./html/loan_list.html"
+				});
+			} else if(type == "4") { //区域管理员
+				$("#menu1").hide();
+				$("#menu6").hide();
+				$("#menu7").hide();
+				$("#menu_2 li").eq(0).hide();
+				$("#menu_4 li").eq(0).hide();
+				$("#menu_8 li").eq(0).hide();
+				$("#main_iframe").attr({
+					"src": "./html/form_alipay_user.html"
+				});
+			}else if(type == "5") { //保险管理员
+				$("#menu1").hide();
+				$("#menu2").hide();
+				$("#menu3").hide();
+				$("#menu5").hide();
+				$("#menu6").hide();
+				$("#menu7").hide();
+				$("#menu4").hide();
+				$("#main_iframe").attr({
+					"src": "./html/insurance_product.html"
+				});
+			}
+
+		});
+
+		function Logout() {
+			$.post("/ViliageMgr/api/admin/mgr/logout", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+
+					}
+				}
+			}, 'json');
+			window.location.href = "login.html";
+		}
+
+		function navClick(obj) {
+			if($(obj).next('.nav_menu_sub').hasClass('on')) {
+				$('.nav_menu_sub.on').slideUp();
+				$('.nav_menu_sub.on').removeClass('on');
+			} else {
+				$('.nav_menu_sub.on').slideUp();
+				$('.nav_menu_sub.on').removeClass('on');
+				$(obj).next('.nav_menu_sub').slideToggle();
+				$(obj).next('.nav_menu_sub').addClass('on');
+
+			}
+		}
+	</script>
+
+</html>

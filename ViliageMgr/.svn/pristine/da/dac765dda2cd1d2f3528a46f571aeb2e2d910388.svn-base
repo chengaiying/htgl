@@ -1,0 +1,93 @@
+package com.moa.mgr.model;
+
+public class NewsModel {
+
+	//id
+	private   String id;
+	// 新闻标题
+	private   String title;
+	//新闻类型
+	private   String type;
+	//新闻链接
+	private  String news_url;
+	//新闻内容
+	public  String news_content;
+	//新闻来源
+	public  String newsource;
+	public String getNewsource() {
+		return newsource;
+	}
+	public void setNewsource(String newsource) {
+		this.newsource = newsource;
+	}
+	//添加新闻方式
+	public  String addtype;
+	public String getNews_content() {
+		return news_content;
+	}
+	public void setNews_content(String news_content) {
+		this.news_content = news_content;
+	}
+	public String getAddtype() {
+		return addtype;
+	}
+	public void setAddtype(String addtype) {
+		this.addtype = addtype;
+	}
+	//创建时间
+	private  String createor_time;
+	//创建人
+	private  String createor;
+	//修改时间
+	private  String modify_time;
+	//修改人
+	private  String modify;	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String getNews_url() {
+		return news_url;
+	}
+	public void setNews_url(String news_url) {
+		this.news_url = news_url;
+	}
+	public String getCreateor_time() {
+		return createor_time;
+	}
+	public void setCreateor_time(String createor_time) {
+		this.createor_time = createor_time;
+	}
+	public String getCreateor() {
+		return createor;
+	}
+	public void setCreateor(String createor) {
+		this.createor = createor;
+	}
+	public String getModify_time() {
+		return modify_time;
+	}
+	public void setModify_time(String modify_time) {
+		this.modify_time = modify_time;
+	}
+	public String getModify() {
+		return modify;
+	}
+	public void setModify(String modify) {
+		this.modify = modify;
+	}
+}

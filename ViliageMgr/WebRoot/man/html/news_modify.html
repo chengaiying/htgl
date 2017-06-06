@@ -1,0 +1,231 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="pragma" content="no-cache"> 
+		<meta http-equiv="Cache-Control" content="no-cache, must-revalidate"> 
+		<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="dist/css/wangEditor.min.css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/ajaxfileupload.js"></script>
+		<script src="../js/PictureCompress.js"></script>
+		<script src="dist/js/wangEditor.js" type="text/javascript" charset="utf-8"></script>
+		<script src="dist/js/biaoqing.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/qswteckMap.js"></script>
+		<style type="text/css">
+			.form_item_input_td a {
+				float: left;
+				margin-right: 20px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="frame_content">
+			<form action="">
+				<div class="nav_link"><span class="nav_link_main">新闻中心</span><span class="nav_link_page">/&nbsp;新闻修改</span></div>
+				<table border="0" cellspacing="0" cellpadding="0" width="100%">
+					<form id="basic_info"></form>
+					<tr>
+						<td width="1%" align="right" nowrap="" class="form_item_name">新闻发布方式：</td>
+						<td class="form_item_input_td">
+							<select id="newsType1" name="addtype" title="" class="info_frame_select" style="width: 300px;">
+								
+								
+							</select>
+						</td>
+						
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap="" class="form_item_name">请选择新闻类型：</td>
+						<td class="form_item_input_td">
+							<select id="newsType" name="type" title="" class="info_frame_select" style="width: 300px;">
+								<option value="1">政策前沿</option>
+								<!--<option value="2">补贴动态</option>
+								<option value="3">市场行情</option>-->
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap="" class="form_item_name">新闻名称：</td>
+						<td nowrap="" class="form_item_input_td">
+							<input id="news_name" name="title" type="text" value="" size="60" placeholder="请设置新闻名称" class="info_frame_input">
+						</td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap="" class="form_item_name">新闻发布来源：</td>
+						<td nowrap="" class="form_item_input_td">
+							<input id="newsource" name="newsource" type="text" value="" size="60" placeholder="请设置新闻发布来源" class="info_frame_input" list="new_source">
+							<!--<datalist id="new_source">  
+							    <option value="中国 北京">  
+							    <option value="中国 上海">  
+							    <option value="中国 广州">  
+							    <option value="中国 深圳">  
+							    <option value="中国 东莞">  
+							</datalist>  -->
+						</td>
+					</tr>
+					
+					<tr class="link" style="display: none;">
+						<td align="right" nowrap="" class="form_item_name">新闻连接：</td>
+						<td nowrap="" class="form_item_input_td"><textarea id="news_link" name="news_url" class="info_frame_textarea" size="60" rows="10"></textarea></td>
+					</tr>
+					<tr class="content" style="display: none;">
+						<td align="right" nowrap="" class="form_item_name">新闻内容：</td>
+						<td width="100%"><textarea id="news_content" name="news_content" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+					</tr>
+
+					<tr>
+						<td nowrap="">&nbsp;</td>
+						<td class="form_item_input_td">
+							<a href="javascript:;">
+								<div class="btn1" onClick="myBtnClick(this,'#00AAEE','');AddUser();">
+									<div class="btn1_txt">修改</div>
+								</div>
+							</a>&nbsp;&nbsp;&nbsp;&nbsp;
+							<a href="javascript:;">
+								<div class="btn1" onClick="myBtnClick(this,'#00AAEE','news_list.html');">
+									<div class="btn1_txt">返回</div>
+								</div>
+							</a>
+						</td>
+						
+					</tr>
+				</table>
+			</form>
+		</div>
+	</body>
+	<script type="text/javascript">
+		//获取URL中的活动id参数
+		function getUrlParam(paraName) {
+			var reg = new RegExp("(^|&)" + paraName + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+			var retStr = window.location.search.substr(1).match(reg); //匹配目标参数
+			var ret = unescape(retStr[2]);
+			return ret;
+		}
+
+		$(function() {
+			$.post("/ViliageMgr/api/admin/news/newsDetails?id=" + getUrlParam("id"), function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						//								新闻链接
+						if(data.result.addtype == 0) {
+							$("#newsType1").append("<option value=\"0\">连接发布</option>");
+							
+							$(".link").show();
+							$(".content").hide();
+							$("#news_link").val(data.result.news_url)
+						} else {
+							$("#newsType1").append("<option value=\"1\">自定义内容发布</option>");
+							
+							
+							$(".content").show();
+							$(".link").hide();
+							editor.$txt.html(data.result.news_content);
+
+						}
+						$("#newsType").val(data.result.type)
+						$("#news_name").val(data.result.title)
+						$("#newsource").val(data.result.newsource)
+					}else {
+						alert(data.desc);
+					}
+				}
+			}, "json");
+			var editor = new wangEditor('news_content');
+			//			配置菜单
+			editor.config.menus = [
+				'source',
+				'|',
+				'bold',
+				'underline',
+				'italic',
+				'strikethrough',
+				'eraser',
+				'forecolor',
+				'bgcolor',
+				'|',
+				'quote',
+				'fontfamily',
+				'fontsize',
+				'head',
+				'unorderlist',
+				'orderlist',
+				'alignleft',
+				'aligncenter',
+				'alignright',
+				'|',
+				'link',
+				'unlink',
+				'table',
+				'emotion',
+				'|',
+				'img',
+				'video',
+				'location',
+				'insertcode',
+				'|',
+				'undo',
+				'redo',
+				'fullscreen'
+			];
+			editor.config.emotions = {
+				// 第一组，id叫做 'default' 
+				'default': {
+					title: '默认', // 组名称
+					data: a // 服务器的一个json文件url，例如官网这里配置的是 http://www.wangeditor.com/wangEditor/test/emotions.data
+				},
+			};
+			//				上传图片
+			editor.config.uploadImgUrl = './ViliageMgr/api/admin/file/uploadNews';
+
+			// 配置自定义参数（举例）
+			editor.config.uploadParams = {
+
+			};
+			// 自定义上传事件
+			editor.config.uploadImgFns.onload = function(resultText, xhr) {
+				// resultText 服务器端返回的text
+				// xhr 是 xmlHttpRequest 对象，IE8、9中不支持
+
+				// 上传图片时，已经将图片的名字存在 editor.uploadImgOriginalName
+				var originalName = editor.uploadImgOriginalName || '';
+//				alert(resultText);
+				// 如果 resultText 是图片的url地址，可以这样插入图片：
+				editor.command(null, 'insertHtml', '<img src="' + resultText + '" alt="' + originalName + '" style="max-width:100%;"/>');
+				// 如果不想要 img 的 max-width 样式，也可以这样插入：
+				// editor.command(null, 'InsertImage', resultText);
+			};
+			editor.create();
+		})
+
+		//	增加
+		function AddUser() {
+			if($("#news_name").val() == "") {
+				alert("新闻名不能为空!")
+			} else if($("#newsource").val() == "") {
+				alert("新闻发布来源不能为空!")
+			}  else {
+				$.post("/ViliageMgr/api/admin/news/updateNews?id=" + getUrlParam("id"),$("form").serialize(),function(data, textStatus) {
+						if(textStatus == 'success' && data != null) {
+							if(data.code == 0) {
+								
+								alert("修改成功!");
+								window.location.href="news_list.html";
+							} else {
+								alert(data.desc);
+							}
+						}
+					}, "json");
+			}
+		}
+	</script>
+
+</html>

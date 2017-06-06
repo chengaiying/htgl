@@ -1,0 +1,195 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">贷款管理</span><span class="nav_link_page">/&nbsp;贷款申请信息</span></div>
+
+
+<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+<tr>
+  <td colspan="3" class="data_tb1_hd">搜索条件</td>
+  </tr>
+<tr><td class="data_tb1" width="1%" nowrap>
+  <input id="input_0" type="text" value="" size="15" placeholder="关键字" class="info_frame_input">
+  <input id="input_1" type="date" value="" size="15" placeholder="请输入起始时间" class="info_frame_date">
+  <input id="input_2" type="date" value="" size="15" placeholder="请输入结束时间" class="info_frame_date">
+</td>
+<td class="data_tb1" ></td>
+  <td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');Query()"><div class="btn1_txt">搜索</div></div></a>
+  </td>
+  </tr>
+</table>
+
+
+<br />
+<table id="loan_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td>序号</td>
+    <td>贷款产品名<br>
+      [申请提交时间]</td>
+    <td>农场主<br>
+      [身份证号]</td>
+    <td>申请额度</td>
+    <td>贷款期限</td>
+    <td>贷款用途</td>
+    <td>联系方式</td>
+    <td>当前状态</td>
+    <td>操作</td>
+  </tr>
+</table>
+
+<br />
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-right:10px;">
+<a href="javascript:;"><div class="btn3" onClick="ClickPage(0)"><div id="up_page_btn" class="btn3_txt">上一页</div></div></a>
+</td><td>
+<a href="javascript:;"><div class="btn3" onClick="ClickPage(1)"><div id="down_page_btn" class="btn3_txt">下一页</div></div></a>
+</td><td width="99%" align="right">
+<span id="page_num" class="txt1">第1页/共1页</span>
+</td></tr></table>
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+
+<script type="text/javascript">
+	var loanhead;
+	$(document).ready(function() {
+		loanhead = $("#loan_table").html();
+		 page = 1;
+		GetLoan();
+    });
+	
+	function GetLoan() {
+		$.post("/ViliageMgr/api/admin/loan/loanApplyList",{
+			page:page,
+			prod_name:$("#input_0").val(),
+		  bdate:$("#input_1").val(),
+		  edate:$("#input_2").val()
+		} ,function(data, textStatus) {
+			if (textStatus == 'success' && data != null) {
+				if (data.code==0) {
+					$("#loan_table").empty();
+					$("#loan_table").append(loanhead);
+					totalPage = data.result.totalPage;
+					$("#page_num").html("第" + data.result.page + "页/共" + data.result.totalPage + "页");
+					$.each(data.result.applies, function(n, value) {
+						if (value != null) {
+							var tmphtml;
+							tmphtml = "<tr>";
+							tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+							tmphtml = tmphtml + "<td><strong>" + value.prod_name + "</strong><br>[&nbsp;" + value.apply_date.substr(0,10) + "&nbsp;]</td>";
+							tmphtml = tmphtml + "<td>" + value.applier + "<br>[&nbsp;" + value.id_num + "&nbsp;]</td>";
+							tmphtml = tmphtml + "<td>" + value.amount + "万元</td>";
+							tmphtml = tmphtml + "<td>" + value.period + "个月</td>";
+							
+							tmphtml = tmphtml + "<td>" + value.purpose + "</td>";
+							
+							tmphtml = tmphtml + "<td>" + value.phone + "</td>";
+							
+							switch (value.status) {
+								case 0:
+									tmphtml = tmphtml + "<td><font color='#ff0000'>待处理</font></td>";
+									tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"Deal('" + value.id + "'," + "3" + ")\">通过</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"Deal('" + value.id + "'," + "1" +")\">拒绝</a></td>";
+								break;
+								case 1:
+									tmphtml = tmphtml + "<td><font color='#d074ff'>拒绝</font</td>";
+									tmphtml = tmphtml + "<td></td>";
+								break;
+								case 2:
+									tmphtml = tmphtml + "<td><font color='#999999'>用户取消</font</td>";
+									tmphtml = tmphtml + "<td></td>";
+								break;
+								case 3:
+									tmphtml = tmphtml + "<td><font color='#00af00'>通过</font</td>";
+									tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"Deal('" + value.id + "'," + "4" + ")\">完成</a></td>";
+								break;
+								case 4:
+									tmphtml = tmphtml + "<td><font color=''>贷款完成</font</td>";
+									tmphtml = tmphtml + "<td></td>";
+								break;
+							}
+							
+							
+							tmphtml = tmphtml + "</tr>";
+							
+							$("#loan_table").append(tmphtml);
+						}
+					});
+				} else {
+					alert("获取失败!");
+				}
+			}
+		}, 'json');
+	}
+	
+	//点击查询
+	function Query() {
+		GetLoan();
+	}
+	
+	//点击翻页，0上一页，1下一页
+	function ClickPage(state) {
+		
+		if (state == 1) {
+			var down_page_btn = document.getElementById("down_page_btn");
+			myBtnClick(down_page_btn,'#ffffff','');
+			if(page >= totalPage) {
+				return;
+			}
+			page = page + 1;
+		}
+		else {
+			var up_page_btn = document.getElementById("up_page_btn");
+			myBtnClick(up_page_btn,'#ffffff','');
+			if (page == 1) {
+				return;
+			}
+			page = page - 1;
+		}
+		
+		GetLoan();
+	}
+	
+	function Deal(loanid,dealcode) {
+		$.post("/ViliageMgr/api/admin/loan/loanApproval", {apply_id:loanid,opt_code:dealcode},function(data, textStatus){
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					GetLoan();
+					alert("提交成功!");
+				} else if (data.code == 100){
+					alert("参数错误");
+				}else if (data.code == -1){
+					alert("失败");
+				} else if (data.code == -2){
+					alert("需要登录");
+				} else if (data.code == -6){
+					alert("无权限");
+				}
+			}
+		}, "json");
+	}
+	
+</script>
+
+</html>

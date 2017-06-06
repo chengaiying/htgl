@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">贷款管理</span><span class="nav_link_page">/&nbsp;贷款产品列表</span></div>
+
+<br />
+<div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">新增贷款产品</div></div>
+
+<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+<tr>
+  <td colspan="3" class="data_tb1_hd">搜索条件</td>
+  </tr>
+<tr><td class="data_tb1" width="1%" nowrap>
+  <input type="date" value="" size="15" placeholder="请输入起始时间" class="info_frame_input">
+  <input type="date" value="" size="15" placeholder="请输入结束时间" class="info_frame_input">
+</td>
+  <td class="data_tb1" nowrap>&nbsp;</td>
+  <td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">搜索</div></div></a>
+  </td>
+  </tr>
+</table>
+
+
+<br />
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td>序号</td>
+    <td>银行</td>
+    <td>贷款产品名<br></td>
+    <td>产品图标</td>
+    <td>产品介绍</td>
+    <td>利率</td>
+    <td>上市日期</td>
+    <td>收件邮箱</td>
+    <td>操作</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><a href="javascript:;" class="data_tb_btn">修改</a>&nbsp;<a href="javascript:;" class="data_tb_btn">删除</a></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><a href="javascript:;" class="data_tb_btn">修改</a>&nbsp;<a href="javascript:;" class="data_tb_btn">删除</a></td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><a href="javascript:;" class="data_tb_btn">修改</a>&nbsp;<a href="javascript:;" class="data_tb_btn">删除</a></td>
+  </tr>
+</table>
+
+<br />
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-right:10px;">
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">上一页</div></div></a>
+</td><td>
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">下一页</div></div></a>
+</td><td width="99%" align="right">
+<span class="txt1">第3页/共5页</span>
+</td></tr></table>
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

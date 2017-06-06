@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div id="frame_shade"></div>
+<div class="nav_link"><span class="nav_link_main">直报管理</span><span class="nav_link_page">/&nbsp;字段维护</span></div>
+
+<br />
+<div class="btn1" style="width:150px" onClick="myBtnClick(this,'#00AAEE','');window.location.href='form_add.html';"><div class="btn1_txt">新增直报</div></div>
+
+<br />
+<table id="table_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td>序号</td>
+    <td>排序</td>
+    <td>直报表单名称</td>
+    <td>图标</td>
+    <td>描述</td>
+    <td>指引图</td>
+    <td>操作</td>
+  </tr>
+</table>
+
+<br />
+
+
+<!--<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-right:10px;">
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">上一页</div></div></a>
+</td><td>
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">下一页</div></div></a>
+</td><td width="99%" align="right">
+<span class="txt1">第1页/共1页</span>
+</td></tr></table>-->
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+
+<script type="text/javascript">
+
+	var tablehead;
+	$(document).ready(function() {
+		tablehead = $("#table_table").html();
+		GetForm();
+    });
+	
+	var page = 1;
+	var totalPage = 1;
+	var formTitle;
+	
+	function GetForm() {
+		$.post("/ViliageMgr/api/admin/form/formList", function(data, textStatus) {
+			if (textStatus == 'success' && data != null) {
+				if (data.code==0) {
+					$.each(data.result, function(n, value) {
+						if (value != null) {
+							var tmphtml;
+							tmphtml = "<tr>";
+							tmphtml = tmphtml + "<td>" + (n+1) + "</td>";
+							tmphtml = tmphtml + "<td>" + value.seq + "</td>";
+							tmphtml = tmphtml + "<td>" + value.formName + "</td>";
+							tmphtml = tmphtml + "<td>" + "<img src=\"" + "/storage/" + value.icon + "\" width=\"40px\" />" + "</td>";
+							tmphtml = tmphtml + "<td>" + value.formDesc + "</td>";
+							tmphtml = tmphtml + "<td>" + "<img src=\"" + "/storage/" + value.bootImg + "\" width=\"40px\" />" + "</td>";
+							tmphtml = tmphtml + "<td>" + "<a id='aLink_" + value.id + "' href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"GetFormField(" + value.id + ")\">查看字段</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"removeFormField(" + value.id + ")\">删除</a>" + "</td>";
+							tmphtml = tmphtml + "</tr>";
+							$("#table_table").append(tmphtml);
+							
+							resetFrameHeight();
+						}
+					});
+				} else {
+					alert("获取表失败!");
+				}
+			}
+		}, 'json');
+	}
+	
+	function GetFormField(formId) {
+		if (formId == 0) {
+			return;
+		}
+				
+		var aLink=$("#aLink_"+formId);
+		
+		if (typeof(aLink.next(".needPopDiv").html()) != "undefined") {
+			popDivHandler(aLink);
+			return;
+		}
+		
+		$.post("/ViliageMgr/api/admin/form/formDefDetail?form_id=" + formId , function(data, textStatus) {
+			if (textStatus == 'success' && data != null) {
+				if (data.code==0) {
+					var tmphtml = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:900px;margin-left:-450px;\"><div class=\"PopTips\"><div class=\"popTipHeader\">字段定义</div>";
+					tmphtml = tmphtml + "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" class=\"data_table\">";
+					tmphtml = tmphtml + "<tr class=\"data_frist_tr\">";
+					tmphtml = tmphtml + "<td>序号</td><td>组别</td><td>显示名</td><td>字段名称</td><td>字段类型</td><td>必填</td><td>单位</td><td>选项数组/范围</td><td>分隔线</td></tr>";
+					$.each(data.result.formWords, function(n, value) {
+						if (value != null) {
+							tmphtml = tmphtml + "<tr>";
+							tmphtml = tmphtml +"<td>" + (n+1) + "</td>";
+							if (value.group != null && value.group != undefined) {
+								tmphtml = tmphtml +"<td>" + value.group + "</td>";
+							}
+							else {
+								tmphtml = tmphtml +"<td>无</td>";
+							}
+							
+							tmphtml = tmphtml +"<td>" + value.display + "</td>";
+							tmphtml = tmphtml +"<td>" + value.paramName + "</td>";
+							switch (value.dataType) {
+								case 1:
+								tmphtml = tmphtml +"<td>文本</td>";
+								break;
+								case 2:
+								if (typeof(value.dotNum) == "undefined")
+									tmphtml = tmphtml +"<td>数字</td>";
+								else
+									tmphtml = tmphtml +"<td>数字."+value.dotNum+"</td>";
+								break;
+								case 3:
+								tmphtml = tmphtml +"<td>选项</td>";
+								break;
+								case 4:
+								tmphtml = tmphtml +"<td>文件</td>";
+								break;
+								case 5:
+								tmphtml = tmphtml +"<td>日期</td>";
+								break;
+								default:
+								tmphtml = tmphtml +"<td>未知</td>";
+								break;
+							}
+							
+							if (value.required == 1) {//必填
+								tmphtml = tmphtml +"<td>是</td>";
+							}
+							else {
+								tmphtml = tmphtml +"<td>否</td>";
+							}
+							
+							if (value.unit != null && value.unit != undefined) {//单位
+								tmphtml = tmphtml +"<td>" + value.unit + "</td>";
+							}
+							else {
+								tmphtml = tmphtml +"<td>无</td>";
+							}
+							
+							if(value.dataType==2)
+							{//数字范围
+								tmphtml = tmphtml +"<td style=\"white-space: normal;\">"+value.minLimit+"-"+value.maxLimit+"</td>";
+							}
+							else
+							{//选项
+								if (value.options != null && value.options != undefined) {
+									tmphtml = tmphtml +"<td style=\"white-space: normal;\">" + value.options + "</td>";
+								}
+								else {
+									tmphtml = tmphtml +"<td>无</td>";
+								}
+							}
+							
+							if (value.div > 0 && value.div != undefined) {//分隔线
+								tmphtml = tmphtml +"<td>有</td>";
+							}
+							else {
+								tmphtml = tmphtml +"<td>无</td>";
+							}
+							tmphtml = tmphtml + "</tr>";
+						}
+					});
+					tmphtml = tmphtml + "</table>";
+					tmphtml = tmphtml + "<center><a href=\"javascript:;\"><div class=\"btn4\" onclick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:;\"><div class=\"btn4\" onclick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a></center></div></div></div>";
+					
+					aLink.after(tmphtml);
+					popDivHandler(aLink);
+				} else {
+					alert("获取表字段失败!");
+				}
+			}
+		}, 'json');
+	}
+	
+	function removeFormField(formId){
+		if(confirm("是否确定删除此条直报表单信息？")){
+			$.post("/ViliageMgr/api/admin/form/removeFormDef?form_id=" + formId , function(data, textStatus) {
+				if (data.desc == 'ok') {
+					if (data.code==0) {
+						 alert("删除成功!");
+						 window.location.reload();
+					}
+				}else{
+					alert("删除失败!");
+				}
+			}, 'json');
+		}
+	}
+	
+</script>
+
+</html>

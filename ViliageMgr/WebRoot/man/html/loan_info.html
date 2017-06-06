@@ -1,0 +1,414 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+
+		<script src="../../echarts/echarts.min.js"></script>
+		<script src="../../echarts/themes/macarons.js"></script>
+		<script src="../../echarts/themes/infographic.js"></script>
+		<script src="../../echarts/themes/shine.js"></script>
+		
+		
+		<style type="text/css">
+			.refusalReason{
+				width: 300px;
+				height: 160px;
+				border: 1px solid #A0A0A0;
+				position: absolute;
+				left: 40%;
+				text-align: center;
+				background-color: #f5f5f5;
+				padding: 10px;
+			}
+			.info_frame_textarea{
+					margin: 0 auto;
+			    height: 50px;
+			    text-align: center;
+			    margin: 10px 0;
+			}
+			.btn1_txt2{
+				width: 50px;
+				margin: 0 auto;
+				text-align: center;
+				background: #009fdf;
+				display: inline-block;
+			}
+			#refusalReason_but1{
+				margin-left: 20px;
+			}
+			.hover{
+				position: relative;
+			}
+			.hover:hover{
+				background-color: antiquewhite;
+   				cursor: pointer;
+			}
+			#PopContext .data_frist_tr td{
+				white-space: initial;
+			}
+			.needPopDiv{
+				background-color: rgba(52, 52, 52, 0.5);
+				
+			}
+			.PopContext{
+				
+				background-color: rgba(255, 255, 255, 1);
+				
+			}
+			/*Tooltips*/
+			
+			.tooltips {
+				position: relative;
+				/*这个是关键*/
+				/*z-index: 2;*/
+			}
+			
+			.tooltips:hover {
+				/*z-index: 3;*/
+				background: none;
+				background-color: antiquewhite;
+   				cursor: pointer;
+				/*没有这个在IE中不可用*/
+			}
+			
+			.tooltips span {
+				display: none;
+			}
+			
+			.tooltips:hover span {
+				/*span 标签仅在 :hover 状态时显示*/
+				display: block;
+				position: absolute;
+				top: 30px;
+				left: 50%;
+				font-size: 12px;
+				width: 10em;
+				/*word-wrap: normal;*/
+				/*border: 1px solid black;*/
+				border-radius: 5px;
+				background-color: gainsboro;
+				padding: 3px;
+				color: black;
+		</style>
+	</head>
+
+	<body>
+		<div id="frame_content">
+			
+			 
+			<div class="nav_link"><span class="nav_link_main">贷款管理</span><span class="nav_link_page">/&nbsp;贷款申请信息</span></div>
+
+			<br />
+			<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+				<tr>
+					<td colspan="3" class="data_tb1_hd">搜索条件</td>
+				</tr>
+				<tr>
+					<td class="data_tb1" width="1%" nowrap>
+						<input id="input_0" type="text" value="" size="15" placeholder="关键字" class="info_frame_input">
+						<input id="input_1" type="date" value="" size="15" placeholder="请输入起始时间" class="info_frame_date">
+						<input id="input_2" type="date" value="" size="15" placeholder="请输入结束时间" class="info_frame_date">
+					</td>
+					<td class="data_tb1"></td>
+					<td class="data_tb1" width="1%">
+						<a href="javascript:;">
+							<div class="btn1" onClick="myBtnClick(this,'#00AAEE','');Query()">
+								<div class="btn1_txt">搜索</div>
+							</div>
+						</a>
+					</td>
+				</tr>
+			</table>
+
+			<br />
+			<table id="loan_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+				<tr class="data_frist_tr">
+					<td>序号</td>
+					<td>贷款产品名<br> [申请提交时间]
+					</td>
+					<td>农场主<br> [身份证号]
+					</td>
+					<td>申请额度</td>
+					<td>贷款期限</td>
+					<td>贷款用途</td>
+					<td>联系方式</td>
+					<td>当前状态</td>
+					<td>操作</td>
+				</tr>
+			</table>
+
+			<br />
+
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="padding-right:10px;">
+						<a href="javascript:;">
+							<div class="btn3" onClick="ClickPage(0)">
+								<div id="up_page_btn" class="btn3_txt">上一页</div>
+							</div>
+						</a>
+					</td>
+					<td>
+						<a href="javascript:;">
+							<div class="btn3" onClick="ClickPage(1)">
+								<div id="down_page_btn" class="btn3_txt">下一页</div>
+							</div>
+						</a>
+					</td>
+					<td width="99%" align="right">
+						<span id="page_num" class="txt1">第1页/共1页</span>
+					</td>
+				</tr>
+			</table>
+
+		</div>
+		<!--frame_content -->
+	</body>
+
+	<script type="text/javascript">
+		var loanhead;
+		$(document).ready(function() {
+			loanhead = $("#loan_table").html();
+			page = 1;
+			GetLoan();
+		});
+
+		function GetLoan() {
+			$.post("/ViliageMgr/api/admin/loan/loanApplyList", {
+				page: page,
+				prod_name: $("#input_0").val(),
+				bdate: $("#input_1").val(),
+				edate: $("#input_2").val()
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						totalPage = data.result.totalPage;
+						$("#page_num").html("第" + data.result.page + "页/共" + data.result.totalPage + "页");
+						$.each(data.result.applies, function(n, value) {
+							if(value != null) {
+								var tmphtml;
+								tmphtml = "<tr id=\""+value.id+"\">";
+								tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+								tmphtml = tmphtml + "<td><strong>" + value.prod_name + "</strong><br>[&nbsp;" + value.apply_date.substr(0, 10) + "&nbsp;]</td>";
+								tmphtml = tmphtml + "<td class=\"hover tooltips\" href=\"#tooltips\" onClick=\"ck('" + value.id_num + "','"+value.applier+ "'," + "this" + ")\"><span>点击查看信息采集信息</span>" + value.applier + "<br>[&nbsp;" + value.id_num + "&nbsp;]</td>";
+								tmphtml = tmphtml + "<td>" + value.amount + "万元</td>";
+								tmphtml = tmphtml + "<td>" + value.period + "个月</td>";
+
+								tmphtml = tmphtml + "<td>" + value.purpose + "</td>";
+
+								tmphtml = tmphtml + "<td>" + value.phone + "</td>";
+
+								switch(value.status) {
+									case 0:
+										tmphtml = tmphtml + "<td><font color='#ff0000'>已申请</font></td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "1" + ")\">通过</a></td>";
+										break;
+									case 1:
+										tmphtml = tmphtml + "<td><font color='#ff0000'>审核中</font></td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "3" + ")\">通过</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"refusalReason('" + value.id + "'," + "2" + ")\">拒绝</a></td>";
+										break;
+									case 2:
+										tmphtml = tmphtml + "<td><font color='#d074ff'>审核未通过</font</td>";
+										tmphtml = tmphtml + "<td></td>";
+										break;
+									case 3:
+										tmphtml = tmphtml + "<td><font color='#00af00'>尽调中</font</td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "5" + ")\">通过</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"refusalReason('" + value.id + "'," + "4" + ")\">拒绝</a></td>";
+										break;
+									case 4:
+										tmphtml = tmphtml + "<td><font color='#d074ff'>尽调未通过</font</td>";
+										tmphtml = tmphtml + "<td></td>";
+										break;
+									case 5:
+										tmphtml = tmphtml + "<td><font color='#00af00'>放款中</font</td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "6" + ")\">确定放款</a></td>";
+										break;
+									case 6:
+										tmphtml = tmphtml + "<td><font color='#00af00'>放款成功</font</td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "7" + ")\">完成</a></td>";
+										break;
+									case 7:
+										tmphtml = tmphtml + "<td><font color='#00af00'>还款中</font</td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "8" + ")\">提醒</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"Deal('" + value.id + "'," + "9" + ")\">贷款已还清</a></td>";
+										break;
+									case 8:
+										tmphtml = tmphtml + "<td><font color='#00af00'>已提醒还款</font</td>";
+										tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "'," + "7" + ")\">逾期欠款已还清</a></td>";
+										break;
+									case 9:
+										tmphtml = tmphtml + "<td><font color='#00af00'>贷款已还清</font</td>";
+										tmphtml = tmphtml + "<td></td>";
+										break;
+								}
+
+								tmphtml = tmphtml + "</tr>";
+
+								$("#loan_table").append(tmphtml);
+							}
+						});
+					} else {
+						alert("获取失败!");
+					}
+				}
+			}, 'json');
+		}
+
+		//点击查询
+		function Query() {
+			GetLoan();
+		}
+
+		//点击翻页，0上一页，1下一页
+		function ClickPage(state) {
+
+			if(state == 1) {
+				var down_page_btn = document.getElementById("down_page_btn");
+				myBtnClick(down_page_btn, '#ffffff', '');
+				if(page >= totalPage) {
+					return;
+				}
+				page = page + 1;
+			} else {
+				var up_page_btn = document.getElementById("up_page_btn");
+				myBtnClick(up_page_btn, '#ffffff', '');
+				if(page == 1) {
+					return;
+				}
+				page = page - 1;
+			}
+
+			GetLoan();
+		}
+
+		function Deal(loanid, dealcode) {
+			$.post("/ViliageMgr/api/admin/loan/loanApproval", {
+				apply_id: loanid,
+				opt_code: dealcode
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						GetLoan();
+//						alert("提交成功!");
+					} else{
+						alert(data.desc)
+					}
+				}
+			}, "json");
+		}
+		//		提示
+	function show_confirm(loanid, dealcode){
+		var r=confirm("是否确定此操作？");
+		if (r==true)
+		  {
+		 	Deal(loanid, dealcode)
+		  }
+		
+	}	
+		function Deal1(loanid, dealcode,refusalReason) {
+			$.post("/ViliageMgr/api/admin/loan/loanApproval", {
+				apply_id: loanid,
+				opt_code: dealcode,
+				refusalReason:refusalReason
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						GetLoan();
+						alert("提交成功!");
+					} else if(data.code == 100) {
+						alert("参数错误");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+		
+		
+		function refusalReason(loanid, dealcode){
+
+			$("#"+loanid+"").css("position","relative");
+			$("#"+loanid+"").append("<td class=\"refusalReason\"><div>请填写拒绝原因:</div><input name=\"refusalReason\" rows=\"2\" class=\"info_frame_textarea\" id=\"refusalReason_text\"></input><div><div class=\"btn1_txt2 btn1_txt btn1\" id=\"refusalReason_but\">确定</div><div class=\"btn1_txt2 btn1_txt btn1\" id=\"refusalReason_but1\">取消</div></div></td>");
+			$("#refusalReason_but").click(function(){
+					var	refusalReason=$("#refusalReason_text").val();
+					if(refusalReason==""){
+						alert("请填写拒绝原因")
+					}else{
+						$(".refusalReason").remove();
+						Deal1(loanid, dealcode,refusalReason)
+					
+					}
+					
+			});
+			$("#refusalReason_but1").click(function(){
+				$(".refusalReason").remove();
+			})
+		}
+		
+		
+		function ck(idCard,name,obj){
+			$(".needPopDiv").remove();
+//			obj.style.backgroundColor="";
+			$.post("/ViliageMgr/api/admin/insurer/getUserDetail ", {
+				id_num: idCard
+				
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					var tmphtml = "<div class=\"needPopDiv\"><div class=\"PopContext\" id=\"PopContext\" style=\"width:900px;margin-left:-450px;\"><div class=\"PopTips\"><div class=\"popTipHeader\">信息采集填报信息("+name+")</div>";
+					$.each(data.result, function(n, value) {
+						if(value != null) {
+							$.each(value, function(i,val) {
+								tmphtml = tmphtml + "<h4>"+i+"</h4>";
+								tmphtml = tmphtml + "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" class=\"data_table\">";	
+								$.each(val, function(a,val2) {
+									tmphtml = tmphtml + "<tr class=\"data_frist_tr\">";
+									if(val2.unit!=null&&val2.unit!=undefined&&val2.unit!=""){
+										tmphtml = tmphtml +"<td>"+val2.display+"("+val2.unit+")"+"</td>"
+										if(val2.dataType==4){
+											tmphtml = tmphtml +"<td><img src=\"/storage/"+val2.value+"\" width=\"40px\"/></td>"
+										}else{
+											tmphtml = tmphtml +"<td>"+val2.value+"</td>"
+										}
+										
+									}else{
+										tmphtml = tmphtml +"<td>"+val2.display+"</td>"
+										if(val2.dataType==4){
+											tmphtml = tmphtml +"<td><img src=\"/storage/"+val2.value+"\" width=\"40px\"/></td>"
+										}else{
+											tmphtml = tmphtml +"<td>"+val2.value+"</td>"
+										}
+									}
+									tmphtml = tmphtml +"</tr>";
+								});
+								tmphtml = tmphtml + "</table>";
+							});
+							
+							
+							
+						}else{
+							alert(data.desc)
+						}
+						
+					})
+					
+					tmphtml = tmphtml + "<center><a href=\"javascript:;\"><div class=\"btn4\" onclick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:;\"><div class=\"btn4\" onclick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a></center></div></div></div>";	
+					$('body').append(tmphtml)
+					$(".needPopDiv").show();
+				}
+			}, "json");
+		}			
+	</script>
+
+</html>

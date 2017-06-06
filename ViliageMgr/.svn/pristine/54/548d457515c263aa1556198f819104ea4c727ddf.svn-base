@@ -1,0 +1,236 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">大数据统计</span><span class="nav_link_page">/&nbsp;土地来源</span></div>
+
+
+
+
+
+<br />
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr align="left">
+    <td><div id="main_echarts1" style="width:1024px;height:600px; margin-bottom:20px" class="stats_table"></div></td>
+    
+  </tr>
+  <tr><td><div id="main_echarts2" style="width:1024px;height:600px" class="stats_table"></div></td></tr>
+</table>
+
+
+
+<script type="text/javascript">
+// 基于准备好的dom，初始化echarts实例
+var myChart = echarts.init(document.getElementById('main_echarts1'),'macarons');
+
+option = {
+	title : {
+        text: '平均经营面积统计表',
+        x:'center'
+    },	
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+		top: '50px',
+        data:['平均经营面积','样本个数','样本占比']
+    },
+	grid: {
+		top: '120px',
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: [
+        {
+            type: 'category',
+            data: ['<10','10-50','50-100','100-150','150-200','200-500','500-1000','1000-2000','2000-3000','>3000']
+        },
+		{
+            type: 'category',
+			axisLine: {show:false},
+            axisTick: {show:false},
+            axisLabel: {show:false},
+            splitArea: {show:false},
+            splitLine: {show:false},
+            data: ['<10','10-50','50-100','100-150','150-200','200-500','500-1000','1000-2000','2000-3000','>3000']
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            name: '平均经营面积',
+            min: 0,
+            max: 6000,
+            interval: 600,
+            axisLabel: {
+                formatter: '{value}亩'
+            }
+        },        
+		{
+            type: 'value',
+            name: '数量',
+            min: 0,
+            max: 850,
+            interval: 100,
+			position: 'right',
+            axisLabel: {
+                formatter: '{value}'
+            }
+        },
+
+		{
+            type: 'value',
+            name: '占比',
+            min: 0,
+            max: 100,
+            interval: 10,
+			position: 'right',
+			offset: 60,
+            axisLabel: {
+                formatter: '{value}%'
+            }
+        }
+    ],
+    series: [
+        {
+            name:'样本个数',
+            type:'bar',
+			label: {
+                normal: {
+                    show: true,
+                    position: 'top',
+					formatter: '{c}'
+                }
+            },
+			yAxisIndex: 1,
+            data:[174,271,355,490,248,788,320,184,34,39]
+        },
+        {
+            name:'样本占比',
+            type:'bar',
+			xAxisIndex: 1,
+			itemStyle: {normal: {color:'#007e86'}},
+			label: {normal: {
+                    show: true,
+                    position: 'top',
+					formatter: '{c}%'
+                }
+            },
+			yAxisIndex: 2,
+            data:[5.99,9.34,12.23,16.88,8.54,27.14,11.02,6.34,1.17,1.34]
+			
+        },
+        {
+            name:'平均经营面积',
+            type:'line',
+			itemStyle: {normal: {color:'#d074ff'}},
+            data:[3.26,26.83,67.46,116.5,166.08,291.92,652.83,1306.52,2252.94,5097.87]
+        }
+    ]
+};
+
+myChart.setOption(option);
+</script>
+
+
+
+<script type="text/javascript">
+// 基于准备好的dom，初始化echarts实例
+var myChart = echarts.init(document.getElementById('main_echarts2'),'macarons');
+
+option = {
+	title : {
+        text: '分组总面积统计表',
+        x:'center'
+    },	
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+		top: '50px',
+        data:['分组总面积','分组总面积占比']
+    },
+	grid: {
+		top: '120px',
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: [
+        {
+            type: 'category',
+            data: ['<10','10-50','50-100','100-150','150-200','200-500','500-1000','1000-2000','2000-3000','>3000']
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            name: '分组总面积',
+            min: 0,
+            max: 30,
+            interval: 5,
+            axisLabel: {
+                formatter: '{value}万亩'
+            }
+        },        
+		{
+            type: 'value',
+            name: '分组总面积占比',
+            min: 0,
+            max: 100,
+            interval: 10,
+			position: 'right',
+            axisLabel: {
+                formatter: '{value}%'
+            }
+        }
+    ],
+    series: [
+        {
+            name:'分组总面积占比',
+            type:'bar',
+			label: {normal: {
+                    show: true,
+                    position: 'top',
+					formatter: '{c}%'
+                }
+            },
+			yAxisIndex: 1,
+            data:[0.05,0.67,2.21,5.26,3.8,21.2,19.26,22.16,7.06,18.33]
+			
+        },
+        {
+            name:'分组总面积',
+            type:'line',
+			itemStyle: {normal: {color:'#d074ff'}},
+            data:[0.0567,0.7271,2.3948,5.7082,4.1187,23.0030,20.8904,24.0398,7.6600,19.8817]
+        }
+    ]
+};
+
+myChart.setOption(option);
+</script>
+
+
+
+
+</div><!--frame_content -->
+</body>
+</html>

@@ -1,0 +1,14 @@
+jdbcUrl = jdbc:mysql://127.0.0.1:3306/viliage?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true
+user = root
+password = mjc
+devMode = true
+rootDir=D:/workspace/NewViliage/storage
+tmpStorageDir=D:/workspace/NewViliage/storage/tmp2
+photoDir=D:/workspace/NewViliage/storage/photo
+licenceImgDir=D:/workspace/NewViliage/storage/licence_img
+formImgDir=D:/workspace/NewViliage/storage/form
+bankDir=D:/workspace/NewViliage/storage/bank
+prodDir=D:/workspace/NewViliage/storage/fi_prod
+con_min_size=5
+con_init_size=5
+con_max_size=10

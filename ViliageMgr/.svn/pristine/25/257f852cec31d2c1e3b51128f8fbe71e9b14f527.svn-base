@@ -1,0 +1,72 @@
+package com.moa.mgr.service;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.apache.http.util.TextUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
+import org.slf4j.LoggerFactory;
+
+import com.jfinal.core.Controller;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.WebConfig4Mgr;
+import com.moa.mgr.common.Utils;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.service.manager.ManagerCache;
+import com.moa.mgr.service.manager.ManagerInfo;
+
+public class FileService {
+	
+	private static final String TAG = "FileService";
+	
+	private static final String FILE_PARAM_NAME = "file_param_name";
+	
+	public static final int PHOTO_FILE_LIMIT = 1024 * 1024;
+	
+	public static ResultInfo<String> uploadBase64(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		
+		String fileParamName = controller.getPara(FILE_PARAM_NAME);
+		if (TextUtils.isEmpty(fileParamName)) {
+			return new ResultInfo<String> (ResultCodes.RET_FAILED); 
+		}
+		
+		
+		String base64Str = controller.getPara("file");
+		if (Utils.isEmpty(base64Str)) {
+			return new ResultInfo<String> (ResultCodes.RET_FAILED); 
+		}
+		
+		int index = base64Str.indexOf(",");
+		base64Str = base64Str.substring(index + 1);
+		if (base64Str.length() > PHOTO_FILE_LIMIT) {
+			return new ResultInfo<String> (ResultCodes.RET_FILE_TOO_LARGE);
+		}
+		
+		byte[] data = Base64.decodeBase64(base64Str.getBytes());
+		String fileName = Utils.createUUID() + ".jpg";
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(WebConfig4Mgr.tmpDir + File.separator + fileName);
+			fos.write(data);
+			fos.flush();
+			optMgr.addTmpFile(fileParamName, WebConfig4Mgr.tmpDir + File.separator + fileName);
+			return new ResultInfo<String>(ResultCodes.RET_SUCCESS, "upload file success", "tmp2/" + fileName);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("write to file error");
+		} finally {
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return new ResultInfo<String> (ResultCodes.RET_UNKNOWN_ERROR); 
+	}
+	
+}

@@ -1,0 +1,288 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+<script src="../js/qswteckMap.js"></script>
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+<style type="text/css">
+		.updateClassName input{
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            color: #000;
+            text-align: right;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 1em;
+           	padding: 5px;
+          	 margin-right: 20px;
+            transition: background 0.3s ease-in-out;
+        }
+       .updateClassName input:focus {
+            outline: none;
+            border-color: #9ecaed;
+            box-shadow: 0 0 10px #9ecaed;
+        }
+</style>
+</head>
+
+<body>
+<div id="frame_content">
+<div id="frame_shade"></div>
+<div class="nav_link"><span class="nav_link_main">培训管理</span><span class="nav_link_page">/&nbsp;培训课程信息</span></div>
+
+
+
+<br />
+<div class="btn1" style="width:150px" onclick="myBtnClick(this,'#00AAEE','');window.location.href='addtraincourse.html';"><div class="btn1_txt">新增课程</div></div>
+<br />
+<table id="user_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td style="width: 100px;">序号</td>
+    <td>课程名称</td>
+    <td>课程地点</td>
+    <td>课程时间</td>
+    <td>课程内容</td>
+    <td>课程备注</td>
+    <td style="width: 150px;">操作
+    </td>
+  </tr>
+</table>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 30px;"><tr><td style="padding-right:10px;">
+
+<div id="up_page_btn" class="btn3" onClick="ClickPage(0)"><div class="btn3_txt">上一页</div></div>
+</td><td>
+<div id="down_page_btn" class="btn3" onClick="ClickPage(1)"><div class="btn3_txt">下一页</div></div>
+</td><td width="99%" align="right">
+<span id="page_num" class="txt1">第1页/共1页</span>
+</td></tr></table>
+
+<br />
+
+
+
+</div>
+</body>
+<script type="text/javascript">
+		userhead = $("#user_table").html();
+		page = 1;
+		ClickPage();
+		
+//		删除前执行,确认删除,取消删除
+	function show_confirm(id){
+		var r=confirm("确定删除？");
+		if (r==true)
+		  {
+		 	DeleteClassname(id)
+		  }
+		
+	}	
+	
+	function DeleteClassname(id) {
+		$.post("/ViliageMgr/api/admin/train/removeTrainProject", {id:id},function(data, textStatus){
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					$("#user_table").empty();
+					$("#user_table").append(userhead);
+					ClickPage();
+					alert("删除成功!");
+					
+				}else{
+					alert(data.desc);
+				}
+			}
+		}, "json");
+	}
+	function reviseClassname(id){
+		$("#"+id+"").addClass("updateClassName")
+		 var name=$("#"+id+" td:eq(1)").html();
+		 var address=$("#"+id+" td:eq(2)").html();
+		 var classdate=$("#"+id+" td:eq(3)").html();
+		 var classContent=$("#"+id+" td:eq(4)").html();
+		 var classMessage=$("#"+id+" td:eq(5)").html();
+		var tmphtml="";
+		var tmphtml1="";
+		tmphtml=tmphtml +"<input type=\"text\" value=\"\"  autofocus/>"
+		tmphtml1=tmphtml1 +"<input type=\"date\" value=\"\"  autofocus/>"
+		
+		$("#"+id+" td:eq(1)").text("").html(tmphtml);
+		$("#"+id+" td:eq(1) input").val(name);
+		
+		$("#"+id+" td:eq(2)").text("").html(tmphtml);
+		$("#"+id+" td:eq(2) input").val(address);
+		
+		
+		$("#"+id+" td:eq(3)").text("").html(tmphtml1);
+		$("#"+id+" td:eq(3) input").val(classdate);
+		
+		
+		$("#"+id+" td:eq(4)").text("").html(tmphtml);
+		$("#"+id+" td:eq(4) input").val(classContent);
+		
+		$("#"+id+" td:eq(5)").text("").html(tmphtml);
+		$("#"+id+" td:eq(5) input").val(classMessage);
+		
+		$("#"+id+" td:eq(6)").empty();
+		var undateCancel = "<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"updateClassname('" + id +"')\">确定</a>&nbsp";
+		undateCancel = undateCancel +"<a href=\"javascript:;\" onClick=\" cancelClassname('" +id +"');\" class=\"data_tb_btn\">取消</a>";
+//		console.log(undateCancel)
+		$("#"+id+" td:eq(6)").append(undateCancel);
+		
+
+	}
+	
+//	确认修改
+	function updateClassname(id){
+		var updateName=$("#"+id+" input").val();
+		$.post("/ViliageMgr/api/admin/train/updateTrainProject", 
+		{
+			id:id,
+			trainName:$("#"+id+" td:eq(1) input").val(),
+			trainAddress:$("#"+id+" td:eq(2) input").val(),
+			trainDate:$("#"+id+" td:eq(3) input").val(),
+			trainContent:$("#"+id+" td:eq(4) input").val(),
+			trainMessage:$("#"+id+" td:eq(5) input").val()
+			
+		},function(data, textStatus){
+			var data=JSON.parse(data);
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					ClickPage();
+					alert("修改成功")
+					
+				}else if(data.code == -6){
+					alert("无权限！")
+				}else{
+					alert("修改失败")
+				}
+				
+			}
+		})
+	}
+	
+//	取消修改
+	function cancelClassname(id,name){
+		
+		ClickPage();
+	}
+
+  	//点击翻页，0上一页，1下一页
+	function ClickPage(state) {
+		if (state == 1) {
+			var down_page_btn = document.getElementById("down_page_btn");
+			myBtnClick(down_page_btn,'#ffffff','');
+			if(page >= totalPage) {
+				return;
+			}
+			page = page + 1;
+		}
+		else if(state==0) {
+			var up_page_btn = document.getElementById("up_page_btn");
+			myBtnClick(up_page_btn,'#ffffff','');
+			if (page == 1) {
+				return;
+			}
+			page = page - 1;
+		}
+		$.post("/ViliageMgr/api/admin/train/pageBeanTrain?pageCode="+page, function(data, textStatus) {
+			if (textStatus == 'success' && data != null) {
+				if (data.code==0) {
+				$("#user_table").empty();
+					$("#user_table").append(userhead);
+					totalPage = data.result.columns.pages;
+					$("#page_num").html("共"+data.result.columns.sumCount+"行 "+"第" + data.result.columns.pageCode + "页/共" + data.result.columns.pages + "页");
+					$.each(data.result.columns.beanList, function(n, value) {
+						if (value != null) {
+							var tmphtml;
+							if(value.columns.describe==undefined){
+								value.columns.describe="";
+							}
+							tmphtml = "<tr id=\""+ value.columns.id +"\">";
+							tmphtml = tmphtml + "<td style=\"width：100px\">" + (((page-1) * 20) + (n + 1)) + "</td>"
+							tmphtml = tmphtml + "<td style=\"white-space: normal;\">" + value.columns.train_project + "</td>";
+							tmphtml = tmphtml + "<td style=\"white-space: normal;\">" + value.columns.address + "</td>";
+							tmphtml = tmphtml + "<td>" + value.columns.release_date + "</td>";
+							tmphtml = tmphtml + "<td style=\"white-space: normal;\">" + value.columns.content + "</td>";
+							tmphtml = tmphtml + "<td style=\"white-space: normal;\">" + value.columns.describe + "</td>";
+							tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.columns.id + "')\">删除</a>&nbsp";
+							tmphtml = tmphtml +"<a href=\"javascript:;\" onClick=\"reviseClassname('" + value.columns.id +"');\" class=\"data_tb_btn\">修改</a>";
+							tmphtml = tmphtml +"<a id='aLink_" + value.columns.id + "' href=\"javascript:;\" onClick=\"GetFormField('" + value.columns.id +"');\" class=\"data_tb_btn\">详情</a></td>";
+							tmphtml = tmphtml + "</tr>";
+							$("#user_table").append(tmphtml);
+						}
+					});
+				} else if (data.code == 1) {
+					alert("没有数据!");
+				}
+				else {
+					alert("获取表结构失败!");
+				}
+			}
+		}, 'json');
+	}
+	
+	
+	function GetFormField(formId) {
+		if (formId == 0) {
+			return;
+		}
+				
+		var aLink=$("#aLink_"+formId);
+		
+		if (typeof(aLink.next(".needPopDiv").html()) != "undefined") {
+			popDivHandler(aLink);
+			return;
+		}
+		
+		$.post("/ViliageMgr/api/admin/train/findCourseApply?id="+formId, function(data, textStatus) {
+			if (textStatus == 'success' && data != null) {
+				if (data.code==0) {
+					var tmphtml = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:900px;margin-left:-450px;\"><div class=\"PopTips\"><div class=\"popTipHeader\">课程详情</div>";
+					tmphtml = tmphtml + "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" class=\"data_table\">";
+					tmphtml = tmphtml + "<tr class=\"data_frist_tr\">";
+					tmphtml = tmphtml + "<td>序号</td><td>姓名</td><td>经营主体名称</td><td>身份证号码</td><td>地址</td><td>联系方式</td></tr>";
+					$.each(data.result, function(n, value) {
+						if (value != null) {
+							
+			
+								tmphtml = tmphtml + "<tr>";
+								tmphtml = tmphtml +"<td>" + (n+1) + "</td>";
+	//							姓名
+								tmphtml = tmphtml +"<td>" + value.farmer + "</td>";
+	//							经营主体名称
+								tmphtml = tmphtml +"<td>" + value.farmName + "</td>";
+	//							身份证号码
+								tmphtml = tmphtml +"<td>" + value.idNum + "</td>";
+	//							地址
+								tmphtml = tmphtml +"<td>" + value.address + "</td>";
+	//							电话
+								tmphtml = tmphtml +"<td>" + value.phone + "</td>";
+								
+				
+								tmphtml = tmphtml + "</tr>";
+								
+						
+						}
+					});
+					
+					tmphtml = tmphtml + "</table>";
+					tmphtml = tmphtml + "<center><a href=\"javascript:;\"><div class=\"btn4\" onclick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:;\"><div class=\"btn4\" onclick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a></center></div></div></div>";
+								
+					aLink.after(tmphtml);
+					popDivHandler(aLink);	
+				} else {
+					alert(data.desc);
+				}
+			}
+		}, 'json');
+	}
+</script>
+</html>

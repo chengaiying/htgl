@@ -1,0 +1,144 @@
+package com.moa.mgr;
+
+import java.io.File;
+
+import com.jfinal.config.Constants;
+import com.jfinal.config.Handlers;
+import com.jfinal.config.Interceptors;
+import com.jfinal.config.JFinalConfig;
+import com.jfinal.config.Plugins;
+import com.jfinal.config.Routes;
+import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.druid.DruidPlugin;
+import com.jfinal.render.ViewType;
+import com.moa.mgr.controller.AlipayUserController;
+import com.moa.mgr.controller.CountReportController;
+import com.moa.mgr.controller.RegionController;
+import com.moa.mgr.controller.RegionController2;
+import com.moa.mgr.controller.FileController;
+import com.moa.mgr.controller.FormManController;
+import com.moa.mgr.controller.InsererMgrController;
+import com.moa.mgr.controller.LoanManController;
+import com.moa.mgr.controller.ManagerController;
+import com.moa.mgr.controller.NewsManController;
+import com.moa.mgr.controller.ReportController;
+import com.moa.mgr.controller.TrainContorller;
+import com.moa.mgr.controller.UserController;
+import com.moa.mgr.service.form.FormDefLoader;
+import com.moa.mgr.service.loan.BankLoader;
+import com.moa.mgr.service.loan.FiProdLoader;
+import com.moa.mgr.service.loan.RegionLoader;
+import com.moa.mgr.service.manager.PermissionManager;
+
+public class WebConfig4Mgr extends JFinalConfig {
+
+	public static String rootDir;
+
+	public static String tmpDir;
+
+	public static String formDir;
+
+	public static String bankDir;
+
+	public static String fiProdDir;
+	
+	public static String insurerDir;
+	
+	public static String insprodDir;
+
+	public static boolean isDebug = false;
+
+	private int conMinSize = 5;
+
+	private int conInitSize = 5;
+
+	private int conMaxSize = 20;
+
+
+	public WebConfig4Mgr() {
+	}
+
+	@Override
+	public void configConstant(Constants me) {
+		loadPropertyFile("config.properties");
+		rootDir = getProperty("rootDir");
+		tmpDir = getProperty("tmpStorageDir");
+		formDir = getProperty("formImgDir");
+		bankDir = getProperty("bankDir");
+		insurerDir = getProperty("insurerDir");
+		insprodDir = getProperty("insprodDir");
+		fiProdDir = getProperty("prodDir");
+		isDebug = getPropertyToBoolean("devMode");
+		conMinSize = getPropertyToInt("con_min_size", 5);
+		conInitSize = getPropertyToInt("con_init_size", 5);
+		conMaxSize = getPropertyToInt("con_max_size", 10);
+
+		me.setViewType(ViewType.JSP);
+		me.setMaxPostSize(1024 * 1024);
+	}
+
+	@Override
+	public void configRoute(Routes me) {
+		me.add("/api/admin/report", ReportController.class);
+		me.add("/api/admin/form", FormManController.class);
+		me.add("/api/admin/loan", LoanManController.class);
+		me.add("/api/admin/mgr", ManagerController.class);
+		me.add("api/admin/file", FileController.class);
+		me.add("api/admin/user", UserController.class);
+		me.add("api/admin/region", RegionController.class);
+		me.add("api/admin/region2", RegionController2.class);
+		me.add("api/admin/alipayUser", AlipayUserController.class);
+		me.add("/api/admin/train", TrainContorller.class);
+		me.add("/api/admin/countReport", CountReportController.class);
+		me.add("/api/admin/news", NewsManController.class);
+		me.add("/api/admin/insurer", InsererMgrController.class);
+	}
+
+	@Override
+	public void configPlugin(Plugins me) {
+		DruidPlugin druidPlugin = new DruidPlugin(getProperty("jdbcUrl"),
+				getProperty("user"), getProperty("password").trim());
+		druidPlugin.set(conInitSize, conMinSize, conMaxSize);
+
+		me.add(druidPlugin);
+
+		ActiveRecordPlugin arp = new ActiveRecordPlugin(druidPlugin);
+		me.add(arp);
+	}
+
+	@Override
+	public void configInterceptor(Interceptors me) {
+
+	}
+
+	@Override
+	public void configHandler(Handlers me) {
+	}
+
+	@Override
+	public void afterJFinalStart() {
+		// 可以将初始化工作放在这里
+		FormDefLoader.getInstance().loadFormDefs();
+		BankLoader.getInstance().loadBanks();
+		FiProdLoader.getInstance().loadFiProds();
+		PermissionManager.getInstance().load();
+		RegionLoader.getInstance().loadRegion();
+
+		// 清空临时目录
+		File tmpPath = new File(tmpDir);
+		if (tmpPath.exists() && tmpPath.isDirectory()) {
+			File[] files = tmpPath.listFiles();
+			for (File file : files) {
+				file.delete();
+			}
+		}
+
+		try {
+			// MailUtils.SendSimpleMail("zf21100@163.com", "系统运行记录", "系统重新启动\n"
+			// + Utils.getCurrentTimeStr());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}

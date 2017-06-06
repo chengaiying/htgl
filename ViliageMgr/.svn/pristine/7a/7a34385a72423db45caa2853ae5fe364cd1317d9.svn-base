@@ -1,0 +1,157 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="./css/style.css" rel="stylesheet" type="text/css" />
+<link href="./css/html.css" rel="stylesheet" type="text/css" />
+<script src="./js/jquery-2.1.4.min.js"></script>
+<script src="./js/iframe.js"></script>
+<script src="./js/buttonStyle.js"></script>
+<script src="./js/jquery.form.min.js"></script>
+<script src="../echarts/echarts.min.js"></script>
+<script src="../echarts/themes/macarons.js"></script>
+<script src="../echarts/themes/infographic.js"></script>
+<script src="../echarts/themes/shine.js"></script>
+
+
+</head>
+
+<body>
+	<div id="frame_content">
+		<div class="nav_link">
+			<span class="nav_link_main">管理员管理</span><span class="nav_link_page">/&nbsp;新增经营主体</span>
+		</div>
+
+		<table border="0" cellspacing="0" cellpadding="0" width="100%" 
+			class="data_tb1_table">
+			<tr>
+				<td class="data_tb1" width="1%" nowrap>
+					<form id="onSubmit"  enctype="multipart/form-data" method="post">
+						<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table" style="border-collapse:separate; border-spacing:0px 10px;">
+							<tr>
+								<td style="text-align: right;width: 150px;">请选择类型 ：</td>
+								<td>
+									<select id="hzs_select" name="is_hzs" title="" class="info_frame_select">
+										<!--<option value="2">请选择类型</option>-->
+										<option value="0">家庭农场</option>
+										<option value="1">农民合作社</option>
+										<option value="2">规模养殖场（小区）</option>
+								    </select><span style="color:red">*</span>
+								</td>
+							</tr>
+
+							<tr id="addTypeOne">
+								<td><input type="radio" name="add_type" id="add_type_one" value="0" checked="checked" />方式一(单条数据)</td>
+								<td></td>
+							</tr>
+							<tr id="numText" >
+								<td style="text-align: right;" >身份证号码：</td>
+								<td ><input id="num_text" type="text" name="id_num" value=""
+									size="20" placeholder="身份证号" class="info_frame_input" ><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr id="numContact" >
+								<td style="text-align: right;">联系方式 ：</td>
+								<td ><input id="num_contact" type="text" name="contact"
+									value="" size="20" placeholder="联系方式" class="info_frame_input"><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr id="numUser" >
+								<td style="text-align: right;">用户名 ：</td>
+								<td ><input id="num_user" type="text" name="farmer" value=""
+									size="20" placeholder="用户名" class="info_frame_input"><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr id="yz_name" >
+								<td style="text-align: right;">规模化养殖场名称:</td>
+								<td ><input id="num_user" type="text" name="farm_name" value=""
+									size="20" placeholder="请输入规模化养殖场名称" class="info_frame_input"><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr id="numFarmerName" style="display: none">
+								<td style="text-align: right;">合作社名称 ：</td>
+								<td ><input id="num_farmer_name" type="text"
+									name="farmer_name" value="" size="20" placeholder="合作社名称"  
+									class="info_frame_input" ><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr  id="numLszUser" style="display: none">
+								<td style="text-align: right;">理事长姓名 ：</td>
+								<td ><input id="num_lsz_user" type="text"
+									name="lsz_user" value="" size="20" placeholder="理事长姓名" 
+									class="info_frame_input" ><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr  id="numLszText" style="display: none">
+								<td style="text-align: right;">理事长身份证号 ：</td>
+								<td ><input id="num_lsz_text" type="text"
+									name="lsz_text" value="" size="20" placeholder="理事长身份证号" 
+									class="info_frame_input" >
+								</td>
+							</tr>
+							<tr id="numLszContact" style="display: none">
+								<td style="text-align: right;">理事长电话 ：</td>
+								<td ><input id="num_lsz_contact" type="text"
+									name="lsz_contact" value="" size="20" placeholder="理事长电话号码" 
+									class="info_frame_input" >
+								</td>
+							</tr>
+							<tr id="numDlrUser" style="display: none">
+								<td style="text-align: right;">代理人姓名 ：</td>
+								<td ><input id="num_dlr_user" type="text"
+									name="dlr_user" value="" size="20" placeholder="代理人姓名" 
+									class="info_frame_input" ><span style="color:red">*</span>
+								</td>
+							</tr>
+							<tr id="numDlrText" style="display: none">
+								<td style="text-align: right;">代理人身份证号 ：</td>
+								<td ><input id="num_dlr_text" type="text"
+									name="dlr_text" value="" size="20" placeholder="代理人身份证号" 
+									class="info_frame_input" >
+								</td>
+							</tr>
+							<tr id="numDlrContact" style="display: none">
+								<td style="text-align: right;">代理人电话号码 ：</td>
+								<td ><input id="num_dlr_contact" type="text"
+									name="dlr_contact" value="" size="20" placeholder="代理人电话号码" 
+									class="info_frame_input" >
+								</td>
+							</tr>
+							<tr id="addTypeTwo">
+								<td><input type="radio" name="add_type" id="add_type_two" value="1" />方式二(excel导入)</td>
+								<td></td>
+							</tr>
+							<tr id="numFile">
+								<td style="text-align: right;">批量导入 ：</td>
+								<td ><input id="num_file" type="file" name="file"  disabled="disabled"
+									class="info_frame_input" >
+									<a href="##">模板下载</a>
+								</td>
+							</tr>
+							<tr>
+								<td style="width: 80px;"></td>
+								<td  style="text-align: center;"><a href="javascript:;">
+								<div  class="btn1" onClick="myBtnClick(this,'#00AAEE','');AddUser();">
+								<div  class="btn1_txt">新增</div>
+								</div>
+								</td>
+								
+							</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+		</table>
+		
+		<!--<form id="form1" action="/ViliageMgr/api/admin/user/InitAlipayUser" method="post" enctype="multipart/form-data" >
+        <input type="file" id="file" name="file"></input>
+        <input type="submit" onclick="AddUser()" id="btn" value="上传">
+      </form>-->
+		
+		
+	</div>
+	<!--frame_content -->
+	<script src="js/welcome.js"></script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+<script src="../js/qswteckMap.js"></script>
+<style type="text/css">
+		.updateClassName input{
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            color: #000;
+            text-align: right;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 1em;
+           	padding: 5px;
+          	 margin-right: 20px;
+            transition: background 0.3s ease-in-out;
+        }
+       .updateClassName input:focus {
+            outline: none;
+            border-color: #9ecaed;
+            box-shadow: 0 0 10px #9ecaed;
+        }
+</style>
+</head>
+
+<body style="height:1200px">
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">直报管理</span><span class="nav_link_page">/&nbsp;基础信息</span></div>
+
+<br />
+
+
+
+<table width="200px" border="0" cellspacing="0" cellpadding="0">
+<tr>
+	<td>
+		<select id="farmerType" name="type" title="" class="info_frame_select">
+		        <option value="0">家庭农场</option>
+		        <option value="1">合作社</option>
+		        <option value="2">规模养殖场（小区）</option>
+		</select>
+	</td>
+		<td id="ncz_name"><input id="" name="farmer" type="text" value="" size="20" placeholder="姓名" class="info_frame_input"></td>
+		<td id="ncz_id"><input id="" name="farmer_idcard" type="text" value="" size="20" placeholder="身份证" class="info_frame_input"></td>
+		<td id="ncz_phone"><input id="" name="farmer_phone" type="text" value="" size="20" placeholder="手机号" class="info_frame_input"></td>
+		<td id="hzs" style="display: none;"><input id="" name="hzs" type="text" value="" size="20" placeholder="合作社名称" class="info_frame_input"></td>
+		
+	<td style="padding-right:20px;">
+	<a href="javascript:;"><div id="query_btn" class="btn1" onClick="Query()"><div class="btn1_txt">查询</div></div></a>    
+	</td>
+
+<!-- 
+<td>
+<a href="javascript:;"><div class="btn2" onClick="myBtnClick(this,'#e6e6e6','');"><div class="btn2_txt">输出</div></div></a>    
+</td> -->
+</tr></table>
+
+
+<br />
+<table id="form_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table"> 
+
+
+</table>
+
+<br />
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-right:10px;">
+
+<a href="javascript:;"><div id="up_page_btn" class="btn3" onClick="ClickPage(0)"><div class="btn3_txt">上一页</div></div></a>
+</td><td>
+<a href="javascript:;"><div id="down_page_btn" class="btn3" onClick="ClickPage(1)"><div class="btn3_txt">下一页</div></div></a>
+</td><td width="99%" align="right">
+<span id="page_num" class="txt1">第1页/共1页</span>
+</td></tr></table>
+
+
+</div>
+</body>
+
+
+<script type="text/javascript">
+
+$("#farmerType").change(function(){
+	if($("#farmerType").val()==0){
+		$("#hzs").hide();
+		$("#gmh").hide();
+		$("#ncz_name").show()
+		$("#ncz_id").show()
+		$("#ncz_phone").show()
+		$("#hzs input").val("");
+		
+	}else if($("#farmerType").val()==1){
+		$("#hzs input").attr("placeholder","合作社名称")
+		$("#hzs").show();
+		$("#gmh").hide();
+		$("#ncz_name").hide()
+		$("#ncz_id").hide()
+		$("#ncz_phone").hide()
+		$("#ncz_name input").val("");
+		$("#ncz_id input").val("");
+		$("#ncz_phone input").val("");
+		
+	}else if($("#farmerType").val()==2){
+		$("#hzs input").attr("placeholder","规模养殖场（小区）名称")
+		$("#hzs").show();
+		$("#ncz_name").show();
+		$("#ncz_id").hide()
+		$("#ncz_phone").hide()
+		$("#ncz_name input").val("");
+		$("#ncz_id input").val("");
+		$("#ncz_phone input").val("");
+		$("#hzs input").val("");
+	}
+})
+var page = 1;
+//点击查询
+function Query() {
+	
+	var query_btn = document.getElementById("query_btn");
+	//var farmer=$("#farmer").val();
+	var farmerType=$("#farmerType").val();
+	var regionId = localStorage.getItem("user_region");
+	myBtnClick(query_btn,'#00AAEE','');
+	if(farmerType==0){
+		$("#hzs input").val("");
+		
+	}else if((farmerType==1)){
+		$("#ncz_name input").val("");
+		$("#ncz_id input").val("");
+		$("#ncz_phone input").val("");		
+	}
+	else if((farmerType==2)){
+		$("#ncz_id input").val("");
+		$("#ncz_phone input").val("");
+	}
+	$.post("/ViliageMgr/api/admin/alipayUser/getUser",{
+		is_hzs:farmerType,
+		page:page,
+		farmer:$("#ncz_name input").val(),
+		farmIdNum:$("#ncz_id input").val(),
+		farmPhone:$("#ncz_phone input").val(),
+		farmName:$("#hzs input").val()
+		
+	},function(data, textStatus) {
+		if(data.code==-6){
+			alert(data.desc);
+			return;
+		}
+		
+		//当前页
+		totalPage = data.result.totalPage;
+		$("#form_table").empty();
+		$("#page_num").html("共"+data.result.totalRow+"行 "+"第" + data.result.pageNumber + "页/共" + data.result.totalPage + "页");
+		if(farmerType==1){
+			$("#form_table").append("<tr class=\"data_frist_tr\"><td>序号</td><td>身份证号码</td><td>姓名</td><td>合作社名称</td><td>省份</td><td>城市</td><td>区域</td><td>地址</td><td>电话号码</td><td>是否认证</td><td>操作</td></tr>");
+
+		}else if(farmerType==0){
+			$("#form_table").append("<tr class=\"data_frist_tr\"><td>序号</td><td>身份证号码</td><td>农户名</td><td>农场名</td><td>省份</td><td>城市</td><td>区域</td><td>地址</td><td>电话号码</td><td>是否认证</td><td>操作</td></tr>");
+
+		}else if(farmerType==2){
+			$("#form_table").append("<tr class=\"data_frist_tr\"><td>序号</td><td>身份证号码</td><td>姓名</td><td>规模养殖场（小区）名称</td><td>省份</td><td>城市</td><td>区域</td><td>地址</td><td>电话号码</td><td>是否认证</td><td>操作</td></tr>");
+
+		}
+		page=1;
+		$.each(data.result.list, function(n, value) {
+			if (value != null) {
+				var tmphtml = "<tr id='"+value.id+"'>";
+				//序号
+				tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+				//身份证号码
+				if(value.idNum == undefined){
+					tmphtml = tmphtml + "<td></td>";	
+				}else{
+					tmphtml = tmphtml + "<td>" + value.idNum+ "</td>";
+				}
+				//支付宝账号
+	          /*  if(value.alipayUserId == undefined){
+					tmphtml = tmphtml + "<td></td>";	
+				}else{
+					tmphtml = tmphtml + "<td>" + value.alipayUserId+ "</td>";
+				} */
+				//农户名
+				if (value.farmer == undefined) {
+					tmphtml = tmphtml + "<td>" + "未认证农户" + "</td>";
+				}
+				else {
+					tmphtml = tmphtml + "<td>" + value.farmer + "</td>";
+				}
+				//农户类型 1-家庭农场  2-合作社
+				 /* if(value.alipayUserId == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						if(value.farmerType=="0"){
+						tmphtml = tmphtml + "<td>"+"家庭农场</td>";
+						}
+						if(value.farmerType=="1"){
+							tmphtml = tmphtml + "<td>"+"合作社</td>";
+							}
+					} */
+				//农场名
+				 if(value.farmerName == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.farmerName+ "</td>";
+					}
+				//省份
+				 if(value.province == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.province+ "</td>";
+					}
+				
+				//城市
+				 if(value.city == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.city+ "</td>";
+					}
+				//区域
+				 if(value.district == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.district+ "</td>";
+					}
+				
+				//街道
+				 if(value.viliage == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.viliage+ "</td>";
+					}
+				//电话号码
+				 if(value.contact == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.contact+ "</td>";
+					}
+				
+				//是否验证 1-认证  0-未认证
+				 if(value.contact == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						if(value.iaAuthed=="1"){
+						tmphtml = tmphtml + "<td>" + "已认证"+ "</td>";
+						}
+						if(value.iaAuthed=="0" || value.iaAuthed==""){
+							tmphtml = tmphtml + "<td>" + "未认证"+ "</td>";
+							}
+					}
+				
+				tmphtml =tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "','"+value.iaAuthed+ "','"+value.principal_id+ "')\">删除</a>&nbsp";
+				tmphtml = tmphtml +"<a href=\"javascript:;\" onClick=\"reviseClassname('" + value.id +"','"+value.iaAuthed+ "','"+value.principal_id+ "');\" class=\"data_tb_btn\">修改</a></td>";
+				tmphtml = tmphtml + "</tr>";
+				
+				$("#form_table").append(tmphtml);
+			}
+		});
+		
+	}, 'json');
+}
+
+//点击翻页，0上一页，1下一页
+function ClickPage(state) {
+	var farmerType=$("#farmerType").val();
+	if (state == 1) {
+		var down_page_btn = document.getElementById("down_page_btn");
+		myBtnClick(down_page_btn,'#ffffff','');
+		if(page >= totalPage) {
+			return;
+		}
+		page = page + 1;
+	}
+	else {
+		var up_page_btn = document.getElementById("up_page_btn");
+		myBtnClick(up_page_btn,'#ffffff','');
+		if (page == 1) {
+			return;
+		}
+		page = page - 1;
+	}
+	$("#form_table").empty();
+	if(farmerType==1){
+			$("#form_table").append("<tr class=\"data_frist_tr\"><td>序号</td><td>身份证号码</td><td>姓名</td><td>合作社名称</td><td>省份</td><td>城市</td><td>区域</td><td>地址</td><td>电话号码</td><td>是否认证</td><td>操作</td></tr>");
+
+		}else if(farmerType==0){
+			$("#form_table").append("<tr class=\"data_frist_tr\"><td>序号</td><td>身份证号码</td><td>农户名</td><td>农场名</td><td>省份</td><td>城市</td><td>区域</td><td>地址</td><td>电话号码</td><td>是否认证</td><td>操作</td></tr>");
+
+		}else if(farmerType==2){
+			$("#form_table").append("<tr class=\"data_frist_tr\"><td>序号</td><td>身份证号码</td><td>姓名</td><td>规模养殖场（小区）名称</td><td>省份</td><td>城市</td><td>区域</td><td>地址</td><td>电话号码</td><td>是否认证</td><td>操作</td></tr>");
+
+		}
+	var regionId = localStorage.getItem("user_region");
+	$.post("/ViliageMgr/api/admin/alipayUser/getUser",{
+		is_hzs:farmerType,
+		regionId:regionId,
+		page:page,
+		farmer:$("#ncz_name input").val(),
+		farmIdNum:$("#ncz_id input").val(),
+		farmPhone:$("#ncz_phone input").val(),
+		farmName:$("#hzs input").val()
+		
+	}, function(data, textStatus) {
+		//当前页
+		totalPage = data.result.totalPage;
+		
+		$("#page_num").html("共"+data.result.totalRow+"行 "+"第" + data.result.pageNumber + "页/共" + data.result.totalPage + "页");
+		//
+		$.each(data.result.list, function(n, value) {
+			
+			if (value != null) {
+				var tmphtml = "<tr id='"+value.id+"'>";
+				//序号
+				tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+				//身份证号码
+				if(value.idNum == undefined){
+					tmphtml = tmphtml + "<td></td>";	
+				}else{
+					tmphtml = tmphtml + "<td>" + value.idNum+ "</td>";
+				}
+				//支付宝账号
+	           /* if(value.alipayUserId == undefined){
+					tmphtml = tmphtml + "<td></td>";	
+				}else{
+					tmphtml = tmphtml + "<td>" + value.alipayUserId+ "</td>";
+				} */
+				//农户名
+				if (value.farmer == undefined) {
+					tmphtml = tmphtml + "<td>" + "未认证农户" + "</td>";
+				}
+				else {
+					tmphtml = tmphtml + "<td>" + value.farmer + "</td>";
+				}
+				//农户类型 1-家庭农场  2-合作社
+				/*  if(value.alipayUserId == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						if(value.farmerType=="0"){
+						tmphtml = tmphtml + "<td>"+"家庭农场</td>";
+						}
+						if(value.farmerType=="1"){
+							tmphtml = tmphtml + "<td>"+"合作社</td>";
+							}
+					} */
+				//农场名
+				 if(value.farmerName == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.farmerName+ "</td>";
+					}
+				//省份
+				 if(value.province == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.province+ "</td>";
+					}
+				
+				//城市
+				 if(value.city == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.city+ "</td>";
+					}
+				//区域
+				 if(value.district == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.district+ "</td>";
+					}
+				
+				//街道
+				 if(value.viliage == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.viliage+ "</td>";
+					}
+				//电话号码
+				 if(value.contact == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						tmphtml = tmphtml + "<td>" + value.contact+ "</td>";
+					}
+				
+				//是否验证 1-认证  0-未认证
+				 if(value.contact == undefined){
+						tmphtml = tmphtml + "<td></td>";	
+					}else{
+						if(value.iaAuthed=="1"){
+						tmphtml = tmphtml + "<td>" + "已认证"+ "</td>";
+						}
+						if(value.iaAuthed=="0"){
+							tmphtml = tmphtml + "<td>" + "未认证"+ "</td>";
+							}
+					}
+				
+				tmphtml =tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.id + "','"+value.iaAuthed+ "','"+value.principal_id+ "')\">删除</a>&nbsp";
+				tmphtml = tmphtml +"<a href=\"javascript:;\" onClick=\"reviseClassname('" + value.id +"','"+value.iaAuthed+ "','"+value.principal_id+ "');\" class=\"data_tb_btn\">修改</a></td>";
+				tmphtml = tmphtml + "</tr>";
+				
+				$("#form_table").append(tmphtml);	
+			}
+		});
+		
+	}, 'json');
+}
+
+
+
+
+//修改
+function reviseClassname(id,isAuthed,principal_id){
+		$("#"+id+"").addClass("updateClassName")
+		 idcard=$("#"+id+" td:eq(1)").html();
+		 name=$("#"+id+" td:eq(2)").html();
+		 farmerName=$("#"+id+" td:eq(3)").html();
+		 phone=$("#"+id+" td:eq(8)").html();
+		
+		var tmphtml="";
+		tmphtml=tmphtml +"<input type=\"text\" value=\"\"  autofocus/>"
+		$("#"+id+" td:eq(1)").text("").html(tmphtml);
+		$("#"+id+" td:eq(1) input").val(idcard);
+		
+		$("#"+id+" td:eq(2)").text("").html(tmphtml);
+		$("#"+id+" td:eq(2) input").val(name);
+		
+		
+		$("#"+id+" td:eq(3)").text("").html(tmphtml);
+		$("#"+id+" td:eq(3) input").val(farmerName);
+	
+		
+		$("#"+id+" td:eq(8)").text("").html(tmphtml);
+		$("#"+id+" td:eq(8) input").val(phone);
+		
+		$("#"+id+" td:eq(10)").empty();
+		var undateCancel= "<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"updateClassname('" + id +"','"+isAuthed+ "','"+principal_id+ "')\">确定</a>&nbsp";
+		undateCancel = undateCancel +"<a href=\"javascript:;\" onClick=\" cancelClassname('" +id +"','"+isAuthed+ "','"+principal_id+ "');\" class=\"data_tb_btn\">取消</a>";
+		$("#"+id+" td:eq(10)").append(undateCancel);
+
+	}
+//	确认修改
+	function updateClassname(id,isAuthed,principal_id){
+		var idcard1=$("#"+id+" td:eq(1) input").val();
+		var regId = new RegExp(/^[0-9]{17}[0-9|X]$/);//身份证
+		if(regId.test(idcard1)){
+			var name1=$("#"+id+" td:eq(2) input").val();
+			var regName= new RegExp(/^(([\u4e00-\u9fa5]{2,8}))$/);//2到8个字的姓名
+			if(regName.test(name1)){
+				var farmerName1=$("#"+id+" td:eq(3) input").val();
+				var phone1=$("#"+id+" td:eq(8) input").val();
+			
+				var regPhone = new RegExp(/^1[34578]\d{9}$/);//手机号
+				
+				
+				var farmerType=$("#farmerType").val();
+				if(regPhone.test(phone1)){
+					$.post("/ViliageMgr/api/admin/alipayUser/updateUser", 
+						{
+							id:id,
+							is_hzs:farmerType,
+							farmer:name1,
+							contact:phone1,					
+							farm_name:farmerName1,					
+							id_num:idcard1,
+							principal_id:principal_id
+						},
+						
+						function(data, textStatus){
+						var data=JSON.parse(data);
+						if (textStatus == 'success' && data != null) {
+							if (data.code == 0) {
+								alert("修改成功")
+								Query();
+							}else{
+								alert(data.desc)
+							}
+							
+						}
+					})
+				}else{
+					alert("手机号输入有误，请重新输入！")
+				}
+				
+			}else{
+				alert("姓名输入有误，请重新输入！")
+			}
+			
+			
+		}else{
+			alert("身份证号输入有误，请重新输入！")
+		}
+		
+		
+		
+		
+		
+	}
+	
+//	取消修改
+	function cancelClassname(id,isAuthed,principal_id){
+		$("#"+id+" td:eq(1)").empty();
+		$("#"+id+" td:eq(1)").text(idcard);
+					
+		$("#"+id+" td:eq(2)").empty();
+		$("#"+id+" td:eq(2)").text(name);
+					
+					
+		$("#"+id+" td:eq(3)").empty();
+		$("#"+id+" td:eq(3)").text(farmerName);
+					
+		$("#"+id+" td:eq(8)").empty();
+		$("#"+id+" td:eq(8)").text(phone);
+					
+		$("#"+id+" td:eq(10)").empty();
+		var undateCancel= "<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" +id + "','"+isAuthed+ "','"+principal_id+ "')\">删除</a>&nbsp";
+		undateCancel = undateCancel +"<a href=\"javascript:;\" onClick=\"reviseClassname('" +id +"','"+isAuthed+ "','"+principal_id+ "');\" class=\"data_tb_btn\">修改</a>";
+		$("#"+id+" td:eq(10)").append(undateCancel);
+
+	}
+
+//		删除前执行,确认删除,取消删除
+	function show_confirm(id,isAuthed,principal_id){
+		var is_hzs=$("#farmerType").val();
+		if(isAuthed=="1"){
+			alert("该用户已通过认证不能删除!")
+			return;
+		}
+		var r=confirm("确定删除？");
+		if (r==true)
+		  {
+	    	DeleteClassname(id,isAuthed,is_hzs,principal_id)
+		 	
+		  }
+	}	
+//删除
+	function DeleteClassname(id,isAuthed,is_hzs,principal_id) {
+		$.post("/ViliageMgr/api/admin/alipayUser/deleteUser", {id:id,is_authed:isAuthed,is_hzs:is_hzs,principal_id:principal_id},function(data, textStatus){
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+						Query();
+						alert("删除成功!");
+					
+					
+				} else {
+					alert(data.desc)
+				}
+			}
+		}, "json");
+	}
+</script>
+
+</html>

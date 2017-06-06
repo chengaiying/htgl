@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			a{
+				text-decoration: none;
+				color: black;
+			}
+			#form1{
+				width: 350px;
+				padding: 30px;
+				margin: 100px auto;
+				text-align: center;
+				/*background: #F8F8F8;*/
+			}
+			#form1 div{
+				margin-top: 30px;
+			}
+			#form1 .div1{
+				margin-top: 0px;
+			}
+			#form1 span{
+				display: inline-block;
+				width: 100px;
+			}
+			#form1 input{
+				width: 200px;
+				height: 30px;
+			}
+			#form1 a{
+				display: block;
+				font-size: 15px;
+				font-weight: bold;
+				width: 100px;
+				height: 30px;
+				margin: 0 auto;
+				text-align: center;
+				line-height: 30px;
+				background: #F3F3F3;
+			}
+			#span1{
+				display: inline-block;
+				width: 100px;
+				height: 30px;
+				border: 1px solid gray;
+				line-height: 30px;
+			}
+			#span1:hover{
+				background: gray;
+				cursor:pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<form action="" method="post" id="form1">
+			<div class="div1">
+				<span style="width:120PX;text-align:right">原密码：</span><input type="password" name="ori_pswd" value="" id="ori_pswd"/>
+			</div>
+			<div>
+				<span style="width:120PX;text-align:right">新密码：</span><input type="password" name="new_pswd" value="" id="new_pswd"/>
+			</div>
+			<div>
+				<span style="width:120PX;text-align:right">确定新密码：</span><input type="password" name="new1_pswd" value="" id="new1_pswd"/>
+			</div>
+			<div>
+				<!--<input type="submit" name="" id="register" value="确定" />-->
+				<span id="span1"  onclick="tijiao()">确定</span>
+			</div>
+		</form>
+		<script src="js/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			function tijiao(){
+				if($("#new_pswd").val()==$("#new1_pswd").val()){
+					$.post("/ViliageMgr/api/admin/mgr/changePswd",{
+						ori_pswd:$("#ori_pswd").val(),
+						new_pswd:$("#new_pswd").val(),
+						new1_pswd:$("#new1_pswd").val()
+						},function(data, textStatus) {
+							if (textStatus == 'success' && data != null) {
+								var data = JSON.parse(data)
+					
+								if(data.code==0){
+//									$("#form1").html(data.desc);
+									alert("密码修改成功，请重新登录！")
+									window.parent.location.href="login.html";
+								}else{
+									alert(data.desc);
+								}
+							}
+					})
+				}else{
+					alert("密码输入不一致")
+				}
+			}
+		</script>
+	</body>
+</html>

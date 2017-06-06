@@ -1,0 +1,336 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/ajaxfileupload.js"></script>
+		<script src="../js/PictureCompress.js"></script>
+
+		<script src="../../echarts/echarts.min.js"></script>
+		<script src="../../echarts/themes/macarons.js"></script>
+		<script src="../../echarts/themes/infographic.js"></script>
+		<script src="../../echarts/themes/shine.js"></script>
+	</head>
+
+	<body>
+		<div id="frame_content">
+			<div class="nav_link"><span class="nav_link_main">保险管理</span><span class="nav_link_page">/&nbsp;新增保险产品</span></div>
+			<br />
+			<form>
+				<table border="0" cellspacing="0" cellpadding="0" width="100%">
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品适用范围&nbsp;/&nbsp;Product</td>
+						<td nowrap class="form_item_input_td">
+							<select id="admin_select1" name="a_type" title="" class="info_frame_select">
+								<option value="1">请选择适用范围</option>
+								<option value="5">国内</option>
+								<option value="2">省级</option>
+								<option value="3">市级</option>
+								<option value="4">区县级</option>
+							</select>
+							<select name="is_country" id="c_country" style="display:none">
+								<option value="1">国内</option>
+							</select>
+							<select id="c_provice" title="" class="info_frame_select" onchange="GetCityList()" name="province" style="display:none">
+								<option value="">--省--</option>
+							</select>
+							<select id="c_city" title="" class="info_frame_select" onchange="GetCountyList()" name="city" style="display:none">
+								<option value="">--市--</option>
+							</select>
+							<select id="c_xian" title="" class="info_frame_select" name="district" style="display:none">
+								<option value="">--县--</option>
+							</select>
+						</td>
+
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品名称&nbsp;/&nbsp;Name</td>
+						<td nowrap class="form_item_input_td"><input id="ins_name" name="ins_name" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">联系电话&nbsp;/&nbsp;Name</td>
+						<td nowrap class="form_item_input_td"><input id="telphone" name="telphone" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品价格单位类型&nbsp;/&nbsp;Type</td>
+						<td nowrap class="form_item_input_td">
+							<select id="admin_select2" name="price_unit" title="" class="info_frame_select">
+								<option value="0">元/亩</option>
+								<option value="1">元/头</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品价格&nbsp;/&nbsp;Price</td>
+						<td nowrap class="form_item_input_td"><input id="price" name="price" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">保障金额&nbsp;/&nbsp;Guarantee Amount</td>
+						<td nowrap class="form_item_input_td"><input id="claim_amount" name="claim_amount" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">保险期限&nbsp;/&nbsp;Deadline</td>
+						<td nowrap class="form_item_input_td"><input id="ins_term" name="ins_term" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品链接地址&nbsp;/&nbsp;Deadline</td>
+						<td nowrap class="form_item_input_td"><input id="link_url" name="link_url" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品特点&nbsp;/&nbsp;Deadline</td>
+						<td nowrap class="form_item_input_td"><input id="ins_features" name="ins_features" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td width="1%" align="right" nowrap class="form_item_name">产品试用人群&nbsp;/&nbsp;People</td>
+						<td nowrap class="form_item_input_td"><input id="fitpeople" name="fitpeople" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td align="right" nowrap class="form_item_name">产品图标&nbsp;/&nbsp;Icon</td>
+						<td nowrap class="form_item_input_td">
+							<input id="fiprod_icon" class="info_frame_file" type="file" name="ins_icon" onChange="ajaxfile();" maxlength="10" />
+							<span id="J_photoReplace" class="form_input_file_img"><img id="J_imgHere" src="../img/nophoto.png" width="40px" /></span>
+							<span id="J_photoHere_wrap" class="form_input_file_photo" style="display: none;"><img id="J_photoHere" src="" width="40px" /></span>
+
+						</td>
+					</tr>
+					<tr>
+						<td align="right" nowrap class="form_item_name">收件人&nbsp;/&nbsp;E-Mail</td>
+						<td nowrap class="form_item_input_td"><input id="email" name="email" type="text" value="" size="78" placeholder="" class="info_frame_input"></td>
+					</tr>
+					<tr>
+						<td align="right" nowrap class="form_item_name">详情&nbsp;/&nbsp;Introduce</td>
+						<td nowrap class="form_item_input_td"><textarea id="ins_content" name="ins_content" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+					</tr>
+					<tr>
+						<td nowrap>&nbsp;</td>
+						<td nowrap class="form_item_input_td">
+							<a href="javascript:;">
+								<div class="btn1" onClick="myBtnClick(this,'#00AAEE','');Addloan();">
+									<div class="btn1_txt">确定</div>
+								</div>
+							</a>
+						</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+					</tr>
+				</table>
+
+			</form>
+
+		</div>
+		<!--frame_content -->
+	</body>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#admin_select1').change(function() {
+				var admin1 = $(this).children('option:selected').val();
+				if(admin1 == 2) {
+					GetProvinceList();
+					$("#c_country").hide();
+					$("#c_provice").show();
+					$("#c_city").hide();
+					$("#c_xian").hide();
+					
+					$("#c_city").val("");
+					$("#c_xian").val("");
+
+				} else if(admin1 == 3) {
+					GetProvinceList();
+
+					$("#c_provice").show();
+					$("#c_city").show();
+					$("#c_xian").hide();
+					$("#c_xian").val("");
+				} else if(admin1 == 4){
+					GetProvinceList();
+					$("#c_provice").show();
+					$("#c_city").show();
+					$("#c_xian").show();
+				}else{
+					$("#c_provice").hide();
+					$("#c_xian").hide();
+					$("#c_city").hide();
+					$("#c_provice").val("");
+					$("#c_city").val("");
+					$("#c_xian").val("");
+				}
+			})
+		});
+
+		//获取省列表  province
+	    function GetProvinceList() {
+
+	      //清空省
+	      $("#c_provice").empty();
+	      $("#c_provice").html("<option value=\"\">--省--</option>")
+	      $("#c_city").html("<option value=\"\">--市--</option>")
+	      $("#c_xian").html("<option value=\"\">--县--</option>")
+	      $.post("/ViliageMgr/api/admin/region2/getProvnice", function(data, textStatus) {
+	        if(textStatus == 'success' && data != null) {
+
+	          $.each(data.result, function(n, value) {
+
+	            var optionData = "<option value=\"" + value.regionName + "\" name=\"" + value.regionCode + "\" name1=\"" + value.regionId + "\">" + value.regionName + "</option>";
+	            $("#c_provice").append(optionData);
+	          });
+	        }
+	      }, "json");
+
+	    }
+
+	    //
+	    //获取市列表
+	    function GetCityList() {
+	      var provinceId = $("#c_provice").find("option:selected").attr("name1");
+	      var provinceCode= $("#c_provice").find("option:selected").attr("name");
+	      console.log(provinceCode)
+	      //清空市
+	      $("#c_city").empty();
+	      $("#c_xian").empty();
+	      $("#c_city").html("<option value=\"\">--市--</option>")
+	      $("#c_xian").html("<option value=\"\">--县--</option>")
+	      $.post("/ViliageMgr/api/admin/region2/getCity?regionId=" + provinceId+"&regionCode=" + provinceCode, function(data, textStatus) {
+	        if(textStatus == 'success' && data != null) {
+	          //
+	          $.each(data.result, function(n, value) {
+
+	            var optionData = "<option value=\"" + value.regionName + "\" name1=\"" + value.regionCode + "\">" + value.regionName + "</option>";
+	            $("#c_city").append(optionData);
+
+	          });
+
+	        }
+	      }, "json");
+
+	    }
+	    //
+	    //获取县列表
+	    function GetCountyList() {
+	      //清空县
+	      $("#c_xian").empty();
+	      $("#c_xian").html("<option value=\"\">--县--</option>")
+	      var cityCode = $("#c_city").find("option:selected").attr("name1");
+	      $.post("/ViliageMgr/api/admin/region2/getArea?regionCode=" + cityCode, function(data, textStatus) {
+	        if(textStatus == 'success' && data != null) {
+
+	          $.each(data.result, function(n, value) {
+
+	            var optionData = "<option value=\"" + value.regionName + "\">" + value.regionName + "</option>";
+	            $("#c_xian").append(optionData);
+
+	          });
+	        }
+	      }, "json");
+
+	    }
+
+		function Addloan() {
+			admin_select1
+			if($("#ins_name").val()==""){
+				alert("产品名称不能为空!")
+			}else if($("#price").val()==""){
+				alert("产品价格不能为空!")
+			}else if($("#ins_term").val()==""){
+				alert("保险期限不能为空!")
+			}else if($("#telphone").val()==""){
+				alert("联系电话不能为空!")
+			}else if($("#admin_select1").val()=="1"){
+				alert("请选择产品适用范围!")
+			}else if($("#claim_amount").val()==""){
+				alert("请填写保障金额!")
+			}else if($("#link_url").val()==""){
+				alert("请填写产品链接地址!")
+			}else if($("#ins_features").val()==""){
+				alert("请填写产品特点!")
+			}else if($("#fitpeople").val()==""){
+				alert("请填写产品适用人群!")
+			}else if($("#fiprod_icon").val()==""){
+				alert("请上传产品图标!")
+			}else if($("#email").val()==""){
+				alert("请填写收件人!")
+			}else if($("#ins_content").val()==""){
+				alert("请填写产品详情!")
+			}else{
+				$.post("/ViliageMgr/api/admin/insurer/addInsprod", $("form").serialize(), function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						window.location.href = 'insurance_product.html';
+						//alert("提交成功!");
+					} else if(data.code == 100) {
+						alert("参数错误");
+					} else if(data.code == 2) {
+						alert("用户已存在");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+			}
+			
+		}
+
+		//图片上传
+		function ajaxfile() {
+
+			var files = document.getElementById("fiprod_icon").files;
+			for(var i = 0, f; f = files[i]; i++) {
+
+				if(!f.type.match('image.*')) {
+					continue;
+				}
+				console.log("size:" + f.size);
+				var fsize = f.size;
+				var reader = new FileReader();
+				reader.onload = (function(theFile) {
+					return function(e) {
+						//var i = document.getElementById("J_imgHere_" + upid);
+						var img = new Image();
+						img.src = event.target.result;
+						//$(i).css('width',$(i).width()/10+'px');
+						var imgsrc = img.src;
+						if(img.complete) {
+							callback();
+						} else {
+							img.onload = callback;
+						}
+
+						function callback() {
+							if(imgsrc.length > 102400) {
+								imgsrc = compress(img, 0.2);
+							}
+
+							$.post('/ViliageMgr/api/admin/file/uploadByBase64', {
+								file: imgsrc,
+								file_param_name: "ins_icon"
+							}, function(data) {
+								if(data.code == 0) {
+									$("#J_photoHere_wrap").show();
+									$("#J_photoHere").attr('src', imgsrc);
+									$("#J_photoReplace").hide();
+								} else {
+									alert('上传失败');
+								}
+							}, "json");
+							img = null;
+						}
+					};
+				})(f);
+				reader.readAsDataURL(f);
+			}
+		}
+	</script>
+
+</html>

@@ -1,0 +1,106 @@
+package com.moa.mgr.service;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Part;
+
+import org.apache.http.util.TextUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
+import org.slf4j.LoggerFactory;
+
+import com.jfinal.core.Controller;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.WebConfig4Mgr;
+import com.moa.mgr.common.Utils;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.service.manager.ManagerCache;
+import com.moa.mgr.service.manager.ManagerInfo;
+
+public class FileService {
+	
+	private static final String TAG = "FileService";
+	
+	private static final String FILE_PARAM_NAME = "file_param_name";
+	
+	public static final int PHOTO_FILE_LIMIT = 1024 * 1024;
+	
+	public static ResultInfo<String> uploadBase64(Controller controller) {
+		ManagerInfo optMgr = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		
+		String fileParamName = controller.getPara(FILE_PARAM_NAME);
+		if (TextUtils.isEmpty(fileParamName)) {
+			return new ResultInfo<String> (ResultCodes.RET_FAILED); 
+		}
+		
+		
+		String base64Str = controller.getPara("file");
+		if (Utils.isEmpty(base64Str)) {
+			return new ResultInfo<String> (ResultCodes.RET_FAILED); 
+		}
+		
+		int index = base64Str.indexOf(",");
+		base64Str = base64Str.substring(index + 1);
+		if (base64Str.length() > PHOTO_FILE_LIMIT) {
+			return new ResultInfo<String> (ResultCodes.RET_FILE_TOO_LARGE);
+		}
+		byte[] data = Base64.decodeBase64(base64Str.getBytes());
+		String fileName = Utils.createUUID() + ".jpg";
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(WebConfig4Mgr.tmpDir + File.separator + fileName);
+			fos.write(data);
+			fos.flush();
+			optMgr.addTmpFile(fileParamName, WebConfig4Mgr.tmpDir + File.separator + fileName);
+			return new ResultInfo<String>(ResultCodes.RET_SUCCESS, "upload file success", "tmp2/" + fileName);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("write to file error");
+		} finally {
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return new ResultInfo<String> (ResultCodes.RET_UNKNOWN_ERROR); 
+	}
+	public static String uploadNews(Controller controller) throws IOException, ServletException {
+		controller.getResponse().setContentType("textml;charset=UTF-8");
+		controller.getRequest().setCharacterEncoding("UTF-8");
+	        Part part = controller.getRequest().getPart("myFileName");// myFileName是文件域的name属性值
+	        // 文件类型限制
+	        String[] allowedType = { "image/bmp", "image/gif", "image/jpeg", "image/png" };
+	        boolean allowed = Arrays.asList(allowedType).contains(part.getContentType());
+	        if (!allowed) {
+	        	return new String ("文件类型不支持");
+	        }
+	        // 图片大小限制
+	        if (part.getSize() > 5 * 1024 * 1024) {
+	        	return new String ("图片大小不能超过5M");
+	        }
+	        // 包含原始文件名的字符串
+	        String fi = part.getHeader("content-disposition");
+	        // 提取文件拓展名
+	       // String fileNameExtension = fi.substring(fi.indexOf("."), fi.length() - 1);
+	        // 生成实际存储的真实文件名
+	        String realName = Utils.createUUID() + ".jpg";
+	        // 图片存放的真实路径
+	        //String realPath =WebConfig4Mgr.news + File.separator + realName;
+	        String realPath = controller.getRequest().getServletContext().getRealPath("/files") + "/" + realName;
+	        // 将文件写入指定路径下
+	        part.write(realPath);
+	        return new String ("/files/" + realName);
+			
+	        // 返回图片的URL地址
+	       // controller.getResponse().getWriter().write(request.getContextPath() + "/files/" + realName);
+		//return new ResultInfo<String> (ResultCodes.RET_UNKNOWN_ERROR); 
+	}
+	
+}

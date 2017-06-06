@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/qswteckMap.js"></script>
+
+		<script src="../../echarts/echarts.min.js"></script>
+		<script src="../../echarts/themes/macarons.js"></script>
+		<script src="../../echarts/themes/infographic.js"></script>
+		<script src="../../echarts/themes/shine.js"></script>
+	</head>
+
+	<body style="height:1400px">
+		<div id="frame_content">
+			<div id="frame_shade"></div>
+			<div class="nav_link"><span class="nav_link_main">保险管理</span><span class="nav_link_page">/&nbsp;保险产品列表</span></div>
+
+			<br />
+			<div class="btn1" style="width:150px" onClick="myBtnClick(this,'#00AAEE','');window.location.href='insurance_product_add.html';">
+				<div class="btn1_txt">新增保险产品</div>
+			</div>	
+			<br />
+			<table id="loan_table" width="100%" border="10px solid red " cellspacing="0" cellpadding="0" class="data_table">
+				<tr class="data_frist_tr">
+					<td width="40px">序号</td>
+					<td>公司<br></td>
+					<td width="180px">保险产品名称</td>
+					<td>产品图标<br></td>
+					<td>产品特点</td>
+					<td>适用人群</td>
+					<td>产品价格</td>
+					<td>保障金额</td>
+					<td width="200px">保险期限</td>
+					<td>上市日期<br></td>
+					<td>联系电话</td>
+					<td width="150px">操作</td>
+				</tr>
+			</table>
+
+			<br />
+
+			
+		</div>
+		<!--frame_content -->
+	</body>
+
+	<script type="text/javascript">
+		var insurMap = new Map();
+		var loanhead;
+		$(document).ready(function() {
+			loanhead = $("#loan_table").html();
+			$.ajaxSetup({
+				async: false
+			});
+			GetBankList();
+			GetLoan();
+		});
+
+		function GetLoan() {
+			$.post("/ViliageMgr/api/admin/insurer/insprodList", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						$.each(data.result, function(n, value) {
+							if(value != null) {
+								var tmphtml;
+								tmphtml = "<tr>";
+								tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+								tmphtml = tmphtml + "<td>" + insurMap.get(value.ins_id).insurer_name + "</td>";
+								if(value.status == 0) {
+									tmphtml = tmphtml + "<td>" + value.ins_name + "</td>";
+								} else //已下架
+								{
+									tmphtml = tmphtml + "<td style='color:#999999;'><s>" + value.ins_name + "</s></td>";
+								}
+								tmphtml = tmphtml + "<td>" + "<img src=\"" + "/storage/" + value.ins_icon + "\" width=\"40px\" />" + "</td>";						
+								tmphtml = tmphtml + "<td>" + value.ins_features + "</td>";								
+								tmphtml = tmphtml + "<td>" + value.fitpeople + "</td>";
+								tmphtml = tmphtml + "<td>" + value.price + "</td>";
+								tmphtml = tmphtml + "<td>" + value.claim_amount + "</td>";								
+								tmphtml = tmphtml + "<td>" + value.ins_term + "</td>";								
+								tmphtml = tmphtml + "<td>" + value.create_date + "</td>";
+								tmphtml = tmphtml + "<td>" + value.telphone + "</td>";
+								var popDiv = "<div class=\"popTipHeader\">" + value.ins_name + "&nbsp;内容详情</div>";
+								popDiv += "<div class=\"phoneStyleDiv\">" + value.ins_content + "</div>";
+								popDiv = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:400px;margin-left:-200px;\">" +
+									"<div class=\"PopTips\">" + popDiv + "<center>" +
+									"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;" +
+									"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a>" +
+									"</center></div>" +
+									"</div></div>";
+								if(value.status == 0) //正常贷款产品
+								{
+									tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"popDivHandler(this);\">详情</a>" + popDiv + "&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"SetLoan('" + value.id + "','-1')\">下架</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn1\" onClick=\"DeleteLoan('" + value.id + "')\">删除</a></td>";
+								} else //已经下架的贷款产品
+								{
+									tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"popDivHandler(this);\">详情</a>" + popDiv + "&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn2\" onClick=\"SetLoan('" + value.id + "','0')\">上架</a>&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn1\" onClick=\"DeleteLoan('" + value.id + "')\">删除</a></td>";
+								}
+
+								tmphtml = tmphtml + "</tr>";
+
+								$("#loan_table").append(tmphtml);
+							}
+						});
+					} else {
+						alert("获取失败!");
+					}
+				}
+			}, 'json');
+		}
+
+		function GetBankList() {
+
+			$.post("/ViliageMgr/api/admin/insurer/insurerList", function(data, textStatus) {
+
+				if(textStatus == 'success' && data != null) {
+
+					if(data.code == 0) {
+
+						$.each(data.result, function(n, value) {
+
+							if(value != null) {
+
+								var ins = new Object();
+
+//								ins.ins_content = value.ins_content;
+
+//								bank.bankType = value.type;
+
+								ins.insurer_desc = value.insurer_desc;
+
+								ins.insurer_icon = value.insurer_icon;
+
+								ins.insurer_name = value.insurer_name;
+								ins.ins_id=value.id;
+
+								insurMap.remove(ins.ins_id);
+
+								insurMap.put(ins.ins_id, ins);
+
+							}
+							
+
+						});
+
+					}
+
+				}
+
+			}, 'json');
+
+		}
+
+		function DeleteLoan(loanid) {
+			$.post("/ViliageMgr/api/admin/insurer/delteInsprod", {
+				id: loanid
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						GetLoan();
+						alert("提交成功!");
+					} else if(data.code == 100) {
+						alert("参数错误");
+					} else if(data.code == 2) {
+						alert("用户已存在");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+
+		function SetLoan(loanid, sta) {
+			$.post("/ViliageMgr/api/admin/insurer/setInsprodStatus", {
+				id: loanid,
+				status: sta
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						GetLoan();
+						alert("提交成功!");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+	</script>
+
+</html>

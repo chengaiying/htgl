@@ -1,0 +1,277 @@
+$(document).ready(function() {
+	$("#hzs_select").change(function() {
+		var index = $(this).children('option:selected').val();
+		if (index == "0") {
+			$("#numText,#numContact,#numUser").show();//农场的三个字段
+            $("#numFarmerName,#numLszUser,#numLszText,#numLszContact,#numDlrUser,#numDlrText,#numDlrContact").hide();
+
+		} else if (index == "1") {
+			$("#numText,#numContact,#numUser").hide();//农场三个字段
+//			$("#addTypeOne,#addTypeTwo").show();//两个方式
+            $("#numFarmerName,#numLszUser,#numLszText,#numLszContact,#numDlrUser,#numDlrText,#numDlrContact").show();
+		}
+	});
+	
+});
+
+
+
+//var timer = setInterval(function addClear() {
+//	if($("input:radio[name='add_type']:checked").val() == "0"){
+//		//console.log("合作社的第一种");
+//		$("#num_file").val("");
+//		
+//	}
+//	if($("input:radio[name='add_type']:checked").val() == "1"){
+//		//console.log("合作社第二种");
+//		$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").val("");
+//		//农场主第二种
+//		$("#numText,#numContact,#numUser").val("");
+//	}
+//},300);
+     $("#add_type_one").click(function(){
+     	//console.log("合作社的第一种");
+     	//上传文件
+     	$("#num_file").val("");
+		$("#num_file").attr("disabled","disabled");
+     	//农场主第一种
+		$("#num_text,#num_contact,#num_user").removeAttr("disabled");
+		//合作社第一种
+		$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").removeAttr("disabled");
+     });
+     $("#add_type_two").click(function(){
+     	//console.log("第二种方式");
+     	//上传文件
+     	$("#num_file").removeAttr("disabled","disabled");
+     	//农场主第二种
+     	$("#num_text,#num_contact,#num_user").val("");
+		$("#num_text,#num_contact,#num_user").attr("disabled","disabled");
+		//合作社第二种
+		$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").val("");
+		$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").attr("disabled","disabled");
+     });
+     
+
+
+
+    var regId = new RegExp(/^[0-9]{17}[0-9|X]$/);//身份证
+	var regPhone = new RegExp(/^1[34578]\d{9}$/);//手机号
+	var regName= new RegExp(/^(([\u4e00-\u9fa5]{2,8}))$/);//2到8个字的姓名
+	//new RegExp(/^(([\u4e00-\u9fa5]{2,8})|([a-zA-Z]{2,16}))$/)   2到8个字的汉字,或者2到16个字的英文
+function AddUser() {
+	if ($("input:radio[name='add_type']:checked").val() == null) {
+		alert("请选择新增方式");
+		return false;
+	}
+	var sel = $("#hzs_select").val();
+	if (sel == "0") {
+		//****选择家庭农场中的第一种方式————单条数据******
+		if ($("input:radio[name='add_type']:checked").val() == "0") {
+			var idNum = $("input[name='id_num']").val();
+			var contact = $("input[name='contact']").val();
+			var farmer = $("input[name='farmer']").val();
+	
+			if (idNum == '' || idNum == "身份证号") {
+				alert("身份证号不能为空");
+				return false;
+			}
+			if (!regId.test(idNum)) {
+				alert("身份证号格式错误")
+				return false;
+			}
+			if (contact == '' || contact == "联系方式") {
+				alert("联系方式不能为空");
+				return false;
+			}
+			if (!regPhone.test(contact)) {
+				alert("联系方式格式错误")
+				return false;
+			}
+			if (farmer == '' || farmer == "用户名") {
+				alert("姓名不能为空");
+				return false;
+			}
+			if (!regName.test(farmer)) {
+				alert("姓名格式错误")
+				return false;
+			}
+	
+			$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact,#num_file").val("");
+			//家庭农场第一种上传方式
+			$.post("/ViliageMgr/api/admin/user/addUser", $("form").serialize(),
+					function(data, textStatus) {
+						if (textStatus == 'success' && data != null) {
+							if (data.code == 0) {
+								alert("新增数据成功!");
+							} else if (data.code == 100) {
+								alert(data.desc);
+							} else if (data.code == 2) {
+								alert("用户已存在");
+							} else if (data.code == -1) {
+								alert(data.desc);
+							} else if (data.code == -2) {
+								alert("需要登录");
+							} else if (data.code == -6) {
+								alert("无权限");
+							} else {
+								alert("未知错误");
+							}
+							$("#num_text,#num_contact,#num_user").val("");
+						}
+					}, "json");
+			
+		}
+		
+		//****选择家庭农场中的第二种方式————excel导入******
+		else if ($("input:radio[name='add_type']:checked").val() == "1") {
+			$("#num_text,#num_contact,#num_user").val("");
+			$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").val("");
+			if($("input[name='file']").val() == ""){
+				alert("请选择文件");
+				return false;
+			}
+			$('#onSubmit').ajaxSubmit({
+				url :"/ViliageMgr/api/admin/user/addUser?add_type=1", 
+				success : function(obj) {
+					var data = JSON.parse(obj);
+					if (data.code == 0) {
+						alert("数据导入成功!");
+					}else if (data.code == 100) {
+						alert(data.desc);
+					} else if (data.code == 2) {
+						alert("用户已存在");
+					} else if (data.code == -1) {
+						alert(data.desc);
+					} else if (data.code == -2) {
+						alert("需要登录");
+					} else if (data.code == -6) {
+						alert("无权限");
+					}
+					$("#num_file").val("");//清空文件
+				},
+				error : function() {
+					alert('error');
+				}
+			});
+		}//家庭农场第二种方式结束
+	}//选择家庭农场*结束
+	
+	
+	
+	//*******************选择合作社的话**********************
+	else {
+		if ($("input:radio[name='add_type']:checked").val() == null) {
+			alert("请选择新增方式");
+			return false;
+		}
+		$("#num_text,#num_contact,#num_user").val("");//清空家庭农场里的方式一的三个选项
+
+		//********合作社新增的两种方式*********
+		//第一种上传方式：单条数据
+		if ($("input:radio[name='add_type']:checked").val() == "0") {
+			$("#num_file").val("");//清空文件
+			var cooperativeName = $("input[name='farmer_name']").val();//合作社名称
+			var lszUser = $("input[name='lsz_user']").val();//理事长姓名
+			var lszText = $("input[name='lsz_text']").val();//理事长身份证号
+			var lszContact = $("input[name='lsz_contact']").val();//理事长电话
+			var dlrUser = $("input[name='dlr_user']").val();//代理人姓名
+			var dlrText = $("input[name='dlr_text']").val();//代理人身份证号
+			var dlrContact = $("input[name='dlr_contact']").val();//代理人电话号码
+
+			//三个必填选项的校验
+			if (cooperativeName == '' || cooperativeName == "合作社名称") {
+				alert("合作社名称不能为空");
+				return false;
+			}
+			if (lszUser == '' || lszUser == "理事长姓名") {
+				alert("姓名不能为空");
+				return false;
+			}
+			if (!regName.test(lszUser)) {
+				alert("姓名格式错误")
+				return false;
+			}
+			if (dlrUser == '' || dlrUser == "代理人姓名") {
+				alert("姓名不能为空");
+				return false;
+			}
+			if (!regName.test(dlrUser)) {
+				alert("姓名格式错误")
+				return false;
+			}
+			//其余4个非必填的校验
+			if (lszText && !regId.test(lszText)) {
+				alert("身份证号格式错误");
+				return false;
+			}//理事长身份证号
+			if (lszContact && !regPhone.test(lszContact)) {
+				alert("电话号码格式错误");
+				return false;
+			}//理事长电话
+			if (dlrText && !regId.test(dlrText)) {
+				alert("身份证号格式错误");
+				return false;
+			}//代理人身份证号
+			if (dlrContact && !regPhone.test(dlrContact)) {
+				alert("电话号码格式错误");
+				return false;
+			}//代理人电话			
+
+			$.post("/ViliageMgr/api/admin/user/InitAlipayUser",
+							$("form").serialize(),
+							function(data, textStatus) {
+								if (textStatus == 'success' && data != null) {
+									if (data.code == 0) {
+										alert("数据新增成功!");
+									} else if (data.code == 100) {
+										alert(data.desc);
+									} else if (data.code == 2) {
+										alert("用户已存在");
+									} else if (data.code == -1) {
+										alert(data.desc);
+									} else if (data.code == -2) {
+										alert("需要登录");
+									} else if (data.code == -6) {
+										alert("无权限");
+									} else if(data.code == 200){
+										alert(data.desc)
+									}
+									$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").val("");
+								}
+							}, "json");
+		}//我们选择的是合作社单条数据上传
+        //********合作社excel导入方式********
+		else if ($("input:radio[name='add_type']:checked").val() == "1") {
+			$("#num_farmer_name,#num_lsz_user,#num_lsz_text,#num_lsz_contact,#num_dlr_user,#num_dlr_text,#num_dlr_contact").val("");
+			if($("input[name='file']").val() == ""){
+				alert("请选择文件");
+				return false;
+			}
+			$('#onSubmit').ajaxSubmit({
+				url :"/ViliageMgr/api/admin/user/InitAlipayUser", 
+				success : function(obj) {
+					var data = JSON.parse(obj);
+					if (data.code == 0) {
+						alert("数据导入成功!");
+					} else if (data.code == 100) {
+						alert(data.desc);
+					} else if (data.code == 2) {
+						alert("用户已存在");
+					} else if (data.code == -1) {
+						alert(data.desc);
+					} else if (data.code == -2) {
+						alert("需要登录");
+					} else if (data.code == -6) {
+						alert("无权限");
+					} else {
+						alert("未知错误");
+					}
+					$("#num_file").val("");//清空文件
+				},
+				error : function() {
+					alert('error');
+				}
+			});
+		}//我们选择的是合作社文件整体上传
+	}//else合作社*结束
+}//整个方法结束

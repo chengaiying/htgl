@@ -1,0 +1,335 @@
+package com.moa.mgr.service;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.LoggerFactory;
+import com.alibaba.druid.util.StringUtils;
+import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.common.Utils;
+import com.moa.mgr.db.Tables.TAlipayUser;
+import com.moa.mgr.model.AlipayUserModel;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.result.obj.EmptyResultObj;
+import com.moa.mgr.service.manager.ManagerCache;
+import com.moa.mgr.service.manager.ManagerInfo;
+
+public class AlipayUserService {
+	private static final int DEFAULT_PAGE_SIZE = 50;
+	private static final String PAGE_NUMBER = "page";
+	private static final String PAGE_SIZE = "pageSize";
+	private static final String FARMER = "farmer";
+	private static final String FARM_NAME = "farmName";
+	private static final String IS_HZS = "is_hzs";
+	private static final String FARM_ID_NUM = "farmIdNum";
+	private static final String FARM_PHONE = "farmPhone";
+	private static final String TAG = "AlipayUserService";
+	public static ResultInfo<Page<AlipayUserModel>> queryUserByPage(
+			Controller controller) {
+		int pageNumber = controller.getParaToInt(PAGE_NUMBER, 1);
+		int pageSize = controller.getParaToInt(PAGE_SIZE, DEFAULT_PAGE_SIZE);
+		//农场主
+		String farmer = controller.getPara(FARMER);
+		//农场名称（合作社名称）
+		String farmName = controller.getPara(FARM_NAME);
+		//农场主身份证号码
+		String farmIdNum=controller.getPara(FARM_ID_NUM);
+		//农场主手机号码
+		String farmPhone=controller.getPara(FARM_PHONE);
+		//类型
+		String isHzs = controller.getPara(IS_HZS);
+		if (StringUtils.isEmpty(isHzs)) { 
+			return new ResultInfo<Page<AlipayUserModel>>(ResultCodes.RET_FAILED,"请选择农场主类型！");
+		}
+		
+		ManagerInfo mgrInfo = ManagerCache.getInstance().findManager(controller.getAttrForStr(TokenInterceptor.PARAM_MGR_ID));
+		AlipayUserModel model=new AlipayUserModel();
+		String regionId=mgrInfo.regionId;
+		//区域管理员权限控制
+		if (mgrInfo.type == 4) {
+			
+			Utils.getAddress(regionId,model);
+		}
+		String sql = getSql(farmer, isHzs,model,farmIdNum,farmPhone,farmName);
+		List<Object> param = new ArrayList<>();
+		if (!StringUtils.isEmpty(isHzs)) {
+			param.add(isHzs);
+		}
+		if (!StringUtils.isEmpty(farmName)) {
+			param.add("%" + farmName + "%");
+		}
+		if (!StringUtils.isEmpty(farmer)) {
+			param.add("%" + farmer + "%");
+		}
+		if (!StringUtils.isEmpty(farmIdNum)) {
+			param.add("%" + farmIdNum + "%");
+		}
+		if (!StringUtils.isEmpty(farmPhone)) {
+			param.add("%" + farmPhone + "%");
+		}
+		if (!StringUtils.isEmpty(model.getProvince())) {
+			param.add(model.getProvince());
+		}
+		if (!StringUtils.isEmpty(model.getCity())) {
+			param.add(model.getCity());
+		}
+		if (!StringUtils.isEmpty(model.getDistrict())) {
+			param.add(model.getDistrict());
+		}
+		List<AlipayUserModel> userList = new ArrayList<>();
+		Page<Record> result = Db.paginate(pageNumber, pageSize, "select * ",
+				sql, param.toArray());
+		List<Record> list = result.getList();
+		for (Record record : list) {
+			AlipayUserModel user = new AlipayUserModel();
+			user.setId(record.getInt(TAlipayUser.COL_IID).toString());
+			if (record.get(TAlipayUser.COL_PRINCIPAL_ID)!=null) {
+				 user.setPrincipal_id(record.get(TAlipayUser.COL_PRINCIPAL_ID).toString());
+			}else{
+				user.setPrincipal_id("");
+			}
+			user.setIdNum(record.getStr(TAlipayUser.COL_ID));
+			user.setAlipayUserId(record.getStr(TAlipayUser.COL_ALIPAY_USER_ID));
+			user.setFarmer(record.getStr(TAlipayUser.COL_FARMER));
+			user.setFarmerType(record.getStr(TAlipayUser.COL_FARM_TYPE));
+			user.setFarmerName(record.getStr(TAlipayUser.COL_FARM_NAME));
+			user.setProvince(record.getStr(TAlipayUser.COL_PROVINCE));
+			user.setCity(record.getStr(TAlipayUser.COL_CITY));
+			user.setDistrict(record.getStr(TAlipayUser.COL_DISTRICT));
+			user.setViliage(record.getStr(TAlipayUser.COL_VILIAGE));
+			user.setContact(record.getStr(TAlipayUser.COL_CONTACT));
+			user.setIaAuthed(record.getStr(TAlipayUser.COL_IS_AUTHED));
+			userList.add(user);
+		}
+		Page<AlipayUserModel> pageList = new Page<AlipayUserModel>(userList,
+				result.getPageNumber(), result.getPageSize(),
+				result.getTotalPage(), result.getTotalRow());
+		return new ResultInfo<Page<AlipayUserModel>>(ResultCodes.RET_SUCCESS,
+				"ok", pageList);
+	}
+
+	private static String getSql(String farmer, String isHzs,
+			AlipayUserModel model,String farmIdNum,String farmPhone,String farmName) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("from alipay_user where is_hzs=? \n");
+		if(isHzs.equals("0")){
+			if(!StringUtils.isEmpty(farmName)){
+			sql.append("and farm_name like ?  ");
+			}
+			if(!StringUtils.isEmpty(farmer)){
+				sql.append("and farmer like ?  ");
+				}
+			if(!StringUtils.isEmpty(farmIdNum)){
+				sql.append("and id_num like ?  ");
+			}
+			if(!StringUtils.isEmpty(farmPhone)){
+				sql.append("and contact like ?  ");
+			}
+			if(!StringUtils.isEmpty(model.getProvince())){
+				sql.append("and province=?  ");
+			}
+			if(!StringUtils.isEmpty(model.getCity())){
+				sql.append("and city=?  ");
+			}
+			if(!StringUtils.isEmpty(model.getDistrict())){
+				sql.append("and district=?  ");
+			}
+			sql.append("group by id asc");
+		}else if ("1".equals(isHzs)){//xf updated by 20170414
+			
+			if(!StringUtils.isEmpty(farmName)){
+			sql.append("and farm_name like ?  ");
+			}
+			if(!StringUtils.isEmpty(farmer)){
+				sql.append("and farmer like ?  ");
+			}
+			if(!StringUtils.isEmpty(model.getProvince())){
+				sql.append("and province=?  ");
+			}
+			if(!StringUtils.isEmpty(model.getCity())){
+				sql.append("and city=?  ");
+			}
+			if(!StringUtils.isEmpty(model.getDistrict())){
+				sql.append("and district=?  ");
+			}
+			sql.append("group by id asc");
+		} else {//xf updated by 20170414
+			if(!StringUtils.isEmpty(farmName)){
+				sql.append("and farm_name like ?  ");
+			}
+			if(!StringUtils.isEmpty(farmer)){
+				sql.append("and farmer like ?  ");
+			}
+		}
+		return sql.toString();
+	}
+	public static ResultInfo<EmptyResultObj> deleteAlipayUser(Controller controller) {
+		String id=controller.getPara(TAlipayUser.COL_IID);
+		String isAuthed=controller.getPara(TAlipayUser.COL_IS_AUTHED);
+		String is_hzs=controller.getPara(TAlipayUser.COL_IS_HZS);
+		String principal_id=controller.getPara(TAlipayUser.COL_PRINCIPAL_ID);
+		if ("1".equals(isAuthed)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "该用户已通过认证，不能删除");
+		}
+		if (StringUtils.isEmpty(id)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "id不能为空");
+		}
+		try {
+			if ("0".equals(is_hzs) || "2".equals(is_hzs)) {//xf updated by 20170414
+				//删除家庭农场			
+					if (Db.deleteById(TAlipayUser.TABLE_NAME, id)) {
+						return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+					}			 
+			} else {
+				//删除合作社
+				if (StringUtils.isEmpty(principal_id)){
+					Integer id2=null;
+					id2=Db.queryInt("select id from alipay_user where principal_id=?", id);
+					
+					if (id2!=null) {
+							if (Db.deleteById(TAlipayUser.TABLE_NAME, id) && Db.deleteById(TAlipayUser.TABLE_NAME, id2)) {
+								return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+							}
+						
+					} else {					
+							if (Db.deleteById(TAlipayUser.TABLE_NAME, id)) {
+								return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+							}
+					}
+					
+				}else{
+						if (Db.deleteById(TAlipayUser.TABLE_NAME, id)) {
+							return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+						}			
+				}
+			}
+		} catch (Exception e) {
+			return new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR, "删除失败");
+		}
+		return new ResultInfo<>(ResultCodes.RET_FAILED,"未知错误");
+	}
+	public static ResultInfo<EmptyResultObj> updateAlipayUser(Controller controller) {	
+		String id=controller.getPara(TAlipayUser.COL_IID);
+		if (StringUtils.isEmpty(id)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, "id不能为空");
+		}
+		String contact=controller.getPara(TAlipayUser.COL_CONTACT);
+		String farmerName=controller.getPara(TAlipayUser.COL_FARM_NAME);
+		String idNum=controller.getPara(TAlipayUser.COL_ID);
+		String is_hzs=controller.getPara(TAlipayUser.COL_IS_HZS);
+		String farmer=controller.getPara(TAlipayUser.COL_FARMER);
+		String principal_id=controller.getPara(TAlipayUser.COL_PRINCIPAL_ID);
+		
+		String message=checkParam(idNum,contact,farmer,farmerName,is_hzs);
+		if (!StringUtils.isEmpty(message)) {
+			return new ResultInfo<>(ResultCodes.RET_PARAM_ERROR, message);
+		};	
+		if(StringUtils.isEmpty(message)){
+			if ("0".equals(is_hzs) || "2".equals(is_hzs)) {//xf updated by 20170414
+				//修改农场主信息
+				try {
+					int ct=Db.update("update alipay_user set id_num=?,farmer=?,farm_name=?,contact=? where id=?",
+							idNum,farmer,farmerName,contact,id);
+					if (ct == 1) {
+						return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+					}
+				} catch (Exception e) {
+					LoggerFactory.getLogger(TAG).error("hash pash error");
+					return new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR, "删除失败");
+				}
+			} else {
+				//修改合作社信息
+				
+				if (StringUtils.isEmpty(principal_id)) {
+					//1理事长修改合作社信息					
+					Integer id2=null;
+					id2=Db.queryInt("select id from alipay_user where principal_id=?", id);
+					if (id2!=null) {
+					//有代理人的情况，id2是代理人的id	
+						try {
+							int ct=Db.update("update alipay_user set id_num=?,farmer=?,farm_name=?,contact=? where id=?",
+									idNum,farmer,farmerName,contact,id);
+							int ct2=Db.update("update alipay_user set farm_name=? where id=?", farmerName,id2);
+							if (ct==1 && ct2==1) {
+								return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+							}
+						} catch (Exception e) {
+							return new ResultInfo<>(ResultCodes.RET_FAILED,"修改代理人信息出现问题");
+						}		
+					}else{
+						//无代理人的情况
+						try {
+							int ct=Db.update("update alipay_user set id_num=?,farmer=?,farm_name=?,contact=? where id=?",
+									idNum,farmer,farmerName,contact,id);
+							if (ct==1) {
+								return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+							}
+						} catch (Exception e) {
+							return new ResultInfo<>(ResultCodes.RET_FAILED,"修改理事长信息出现问题");
+						}
+					
+					}
+				}else{
+					//2代理人修改合作社信息
+					try {
+						int ct=Db.update("update alipay_user set id_num=?,farmer=?,farm_name=?,contact=? where id=?",
+								idNum,farmer,farmerName,contact,id);
+						int ct2=Db.update("update alipay_user set farm_name=? where id=?", farmerName,principal_id);
+						if (ct == 1 &&ct2==1) {
+							return new ResultInfo<>(ResultCodes.RET_SUCCESS);
+						}
+					} catch (Exception e) {
+						return new ResultInfo<>(ResultCodes.RET_FAILED,"代理人修改信息出现问题");
+					}	
+				}
+			}
+			
+		};
+		return new ResultInfo<>(ResultCodes.RET_FAILED,"未知错误");
+	}
+	
+	/**
+	 * 参数校验
+	 *  
+	 */
+	public static String checkParam( String idNum, String phone,
+			String farmer,String farmerName,String is_hzs) {
+		String message=null;
+		// 农场主身份证信息不能为空
+		if (Utils.isEmpty(idNum)) {
+			message="身份证信息不能为空";
+		}
+		// 农场主身份证格式校验
+		if (!Utils.checkCellIdNumFormat(idNum)) {
+			message="身份证信息格式错误";		
+		}
+		// 农场主手机号码不能为空
+		if (Utils.isEmpty(phone)) {
+			message="手机号码不能为空";
+				}
+		// 农场主名称不能为空
+		if (Utils.isEmpty(farmer)) {
+			message="经营者名称不能为空";	
+		}
+		if (Utils.isEmpty(is_hzs)) {
+			message="家庭农场名称不能为空";			
+		}
+		// 农场主名称不能为空
+		if (Utils.isEmpty(farmerName)) {
+			if ("0".equals(is_hzs)) {
+				message="家庭农场名称不能为空";			
+			}else{
+				message="合作社名称不能为空";			
+			}			
+		}
+		// 手机格式校验
+		if (!Utils.checkCellphoneFormat(phone)) {
+			message="手机号码格式错误";
+		}
+		return message;
+
+	}
+}

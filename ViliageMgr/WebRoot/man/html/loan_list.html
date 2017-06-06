@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/qswteckMap.js"></script>
+
+		<script src="../../echarts/echarts.min.js"></script>
+		<script src="../../echarts/themes/macarons.js"></script>
+		<script src="../../echarts/themes/infographic.js"></script>
+		<script src="../../echarts/themes/shine.js"></script>
+		<style type="text/css">
+		.updateClassName input{
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            color: #000;
+            text-align: right;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 1em;
+           	padding: 5px;
+          	 margin-right: 20px;
+            transition: background 0.3s ease-in-out;
+        }
+       .updateClassName input:focus {
+            outline: none;
+            border-color: #9ecaed;
+            box-shadow: 0 0 10px #9ecaed;
+        }
+		</style>
+	</head>
+
+	<body style="height:1400px">
+		<div id="frame_content">
+			<div id="frame_shade"></div>
+			<div class="nav_link"><span class="nav_link_main">贷款管理</span><span class="nav_link_page">/&nbsp;贷款产品列表</span></div>
+
+			<br />
+			<div class="btn1" style="width:150px" onClick="myBtnClick(this,'#00AAEE','');window.location.href='loan_add.html';">
+				<div class="btn1_txt">新增贷款产品</div>
+			</div>
+
+			<!--<br />
+<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+<tr>
+  <td colspan="3" class="data_tb1_hd">搜索条件</td>
+  </tr>
+<tr><td class="data_tb1" width="1%" nowrap>
+  <input type="text" value="" size="15" placeholder="关键字" class="info_frame_input">
+  <input type="date" value="" size="15" placeholder="请输入起始时间" class="info_frame_date">
+  <input type="date" value="" size="15" placeholder="请输入结束时间" class="info_frame_date">
+</td>
+<td class="data_tb1" ></td>
+  <td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');"><div class="btn1_txt">搜索</div></div></a>
+  </td>
+  </tr>
+</table> -->
+
+			<br />
+			<table id="loan_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+				<tr class="data_frist_tr">
+					<td width="40px">序号</td>
+					<td width="180px">银行</td>
+					<td>贷款产品名<br></td>
+					<td>图标</td>
+					<td>利率</td>
+					<td>上市日期</td>
+					<td width="200px">收件邮箱</td>
+					<td width="150px">操作</td>
+				</tr>
+			</table>
+
+			<br />
+
+			<!--<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-right:10px;">
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">上一页</div></div></a>
+</td><td>
+<a href="javascript:;"><div class="btn3" onClick="myBtnClick(this,'#ffffff','');"><div class="btn3_txt">下一页</div></div></a>
+</td><td width="99%" align="right">
+<span class="txt1">第3页/共5页</span>
+</td></tr></table>-->
+
+		</div>
+		<!--frame_content -->
+	</body>
+
+	<script type="text/javascript">
+		var bankMap = new Map();
+		var loanhead;
+		$(document).ready(function() {
+			loanhead = $("#loan_table").html();
+			$.ajaxSetup({
+				async: false
+			});
+			GetBankList();
+			GetLoan();
+		});
+
+		function GetLoan() {
+			$.post("/ViliageMgr/api/admin/loan/prodList2", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						$.each(data.result, function(n, value) {
+							if(value != null) {
+								var tmphtml;
+							tmphtml = "<tr id=\""+n+"\">";
+								tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+								tmphtml = tmphtml + "<td>" + bankMap.get(value.bankId).bankName + "</td>";
+								if(value.status == 0) {
+									tmphtml = tmphtml + "<td>" + value.prodName + "</td>";
+								} else //已下架
+								{
+									tmphtml = tmphtml + "<td style='color:#999999;'><s>" + value.prodName + "</s></td>";
+								}
+
+								tmphtml = tmphtml + "<td>" + "<img src=\"" + "/storage/" + value.prodIcon + "\" width=\"40px\" />" + "</td>";
+							
+								tmphtml = tmphtml + "<td>" + value.rate + "</td>";
+								tmphtml = tmphtml + "<td>" + value.createDate + "</td>";
+								tmphtml = tmphtml + "<td>" + value.contact + "</td>";
+
+								var popDiv = "<div class=\"popTipHeader\">" + value.prodName + "&nbsp;内容详情</div>";
+								popDiv += "<div class=\"phoneStyleDiv\">" + value.prodContent + "</div>";
+								popDiv = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:400px;margin-left:-200px;\">" +
+									"<div class=\"PopTips\">" + popDiv + "<center>" +
+									"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;" +
+									"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a>" +
+									"</center></div>" +
+									"</div></div>";
+
+								if(value.status == 0) //正常贷款产品
+								{
+									tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"popDivHandler(this);\">详情</a>" + popDiv + "&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"SetLoan('" + value.id + "','-1')\">下架</a>&nbsp;"
+									
+									tmphtml = tmphtml +"<a href=\"javascript:;\" onClick=\"reviseClassname('" + n +"','"+value.id+"');\" class=\"data_tb_btn\">修改</a>&nbsp;";
+									tmphtml = tmphtml +"<a href=\"javascript:;\" class=\"data_tb_btn1\" onClick=\"DeleteLoan('" + value.id + "')\">删除</a></td>";
+								} else //已经下架的贷款产品
+								{
+									tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"popDivHandler(this);\">详情</a>" + popDiv + "&nbsp;<a href=\"javascript:;\" class=\"data_tb_btn2\" onClick=\"SetLoan('" + value.id + "','0')\">上架</a>&nbsp;"
+									tmphtml = tmphtml +"<a href=\"javascript:;\" onClick=\"reviseClassname('" + n +"','"+value.id+"');\" class=\"data_tb_btn\">修改</a>&nbsp;";
+									tmphtml = tmphtml +"<a href=\"javascript:;\" class=\"data_tb_btn1\" onClick=\"DeleteLoan('" + value.id + "')\">删除</a></td>";
+								}
+
+								tmphtml = tmphtml + "</tr>";
+
+								$("#loan_table").append(tmphtml);
+							}
+						});
+					} else {
+						alert("获取失败!");
+					}
+				}
+			}, 'json');
+		}
+
+		function GetBankList() {
+			$.post("/ViliageMgr/api/admin/loan/bankList", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$.each(data.result, function(n, value) {
+							if(value != null) {
+								var bank = new Object();
+								bank.bankId = value.bankId;
+								bank.bankType = value.type;
+								bank.bankName = value.bankName;
+								bank.bankIcon = value.bankIcon;
+								bank.bankDesc = value.bankDesc;
+								bankMap.remove(bank.bankId);
+								bankMap.put(bank.bankId, bank);
+							}
+						});
+					}
+				}
+			}, 'json');
+		}
+
+		function DeleteLoan(loanid) {
+			$.post("/ViliageMgr/api/admin/loan/delFiProd", {
+				prod_id: loanid
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						GetLoan();
+						alert("提交成功!");
+					} else if(data.code == 100) {
+						alert("参数错误");
+					} else if(data.code == 2) {
+						alert("用户已存在");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+
+		function SetLoan(loanid, sta) {
+			$.post("/ViliageMgr/api/admin/loan/setFiProdStatus", {
+				prod_id: loanid,
+				status: sta
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#loan_table").empty();
+						$("#loan_table").append(loanhead);
+						GetLoan();
+						alert("提交成功!");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+		
+//	修改	
+	function reviseClassname(id,pro_id){
+		$("#"+id+"").addClass("updateClassName")
+		 var prodName=$("#"+id+" td:eq(2)").html();
+		 var rate=$("#"+id+" td:eq(4)").html();
+		 var contact=$("#"+id+" td:eq(6)").html();
+		 
+		 
+		var tmphtml="";
+		tmphtml=tmphtml +"<input type=\"text\" value=\"\"  autofocus/>"
+			
+		$("#"+id+" td:eq(2)").text("").html(tmphtml);
+		$("#"+id+" td:eq(2) input").val(prodName);
+		
+		
+		$("#"+id+" td:eq(4)").text("").html(tmphtml);
+		$("#"+id+" td:eq(4) input").val(rate);
+		
+	
+		$("#"+id+" td:eq(6)").text("").html(tmphtml);
+		$("#"+id+" td:eq(6) input").val(contact);
+		
+		
+		$("#"+id+" td:eq(7)").empty();
+		var undateCancel = "<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"updateClassname('" + pro_id +"','"+id+"')\">确定</a>&nbsp";
+		undateCancel = undateCancel +"<a href=\"javascript:;\" onClick=\" cancelClassname('" +pro_id +"');\" class=\"data_tb_btn\">取消</a>";
+//		console.log(undateCancel)
+		$("#"+id+" td:eq(7)").append(undateCancel);
+		
+
+	}
+	
+//	确认修改
+	function updateClassname(pro_id,id){
+		
+		$.post("/ViliageMgr/api/admin/loan/updateProd", 
+		{
+			id:pro_id,
+			prodName:$("#"+id+" td:eq(2) input").val(),
+			rate:$("#"+id+" td:eq(4) input").val(),
+			contact:$("#"+id+" td:eq(6) input").val(),
+		},function(data, textStatus){
+			var data=JSON.parse(data);
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					GetLoan();
+					alert("修改成功")
+				}else{
+					alert(data.desc)
+				}
+				
+			}
+		})
+	}
+	
+//	取消修改
+	function cancelClassname(){
+		
+		GetLoan();
+	}		
+	</script>
+
+</html>

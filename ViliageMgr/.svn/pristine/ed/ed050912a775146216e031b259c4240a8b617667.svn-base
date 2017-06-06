@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+<script src="../js/qswteckMap.js"></script>
+<style type="text/css">
+	.form_item_input_td a{
+		float: left;
+		margin-right: 20px;
+	}
+</style>
+</head>
+
+<body>
+<div id="frame_content">
+<div class="nav_link"><span class="nav_link_main">培训管理</span><span class="nav_link_page">/&nbsp;培训课程信息</span></div>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<form id="basic_info"></form>
+<tr>
+  	<td width="1%" align="right" nowrap="" class="form_item_name">课程名称</td>
+	<td nowrap="" class="form_item_input_td">
+	  	<input id="classinfo" name="class_name" type="text" value="" size="60" placeholder="请设置培训课程名称" class="info_frame_input">
+  	</td>
+</tr>
+<tr>
+  <td align="right" nowrap="" class="form_item_name">课程时间</td>
+  <td nowrap="" class="form_item_input_td">
+  	<input id="classDate" name="trainDate" type="date" value="" size="60" placeholder="请设置培训课程时间" class="info_frame_input">
+  </td>
+</tr>
+<tr>
+  <td align="right" nowrap="" class="form_item_name">课程地点</td>
+  <td nowrap="" class="form_item_input_td">
+  	<input id="classAddress" name="trainAddress" type="text" value="" size="60" placeholder="请设置培训课程地点" class="info_frame_input">
+  </td>
+</tr>
+
+<tr>
+  <td align="right" nowrap="" class="form_item_name">课程简介</td>
+  <td nowrap="" class="form_item_input_td"><textarea  id="classContent" name="trainContent" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+</tr>
+
+<tr>
+  <td align="right" nowrap="" class="form_item_name">课程备注</td>
+  <td nowrap="" class="form_item_input_td"><textarea   id="classMessage" name="trainMessage"  class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+</tr>
+<tr>
+  <td nowrap="">&nbsp;</td>
+	<td  class="form_item_input_td">
+			<a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');AddUser();"><div class="btn1_txt">新增</div></div></a>
+			<a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','./training course.html');"><div class="btn1_txt">返回</div></div></a>
+	</td>
+</tr>
+</table>
+</div>
+</body>
+<script type="text/javascript">
+//	增加
+	function AddUser() {
+			if($("#classinfo").val()==""){
+				alert("课程名不能为空!")
+			}else{
+				$.post("/ViliageMgr/api/admin/train/addTrainProject",
+				{
+					trainName:$("#classinfo").val(),
+					trainAddress:$("#classAddress").val(),
+					trainDate:$("#classDate").val(),
+					trainContent:$("#classContent").val(),
+					trainMessage:$("#classMessage").val()
+					
+				},
+				function(data, textStatus){
+					if (textStatus == 'success' && data != null) {
+						if (data.code == 0) {
+							$("#classinfo").val("");
+							$("#classAddress").val("");
+							$("#classDate").val("");
+							$("#classContent").val("");
+							$("#classMessage").val("");
+							
+							alert("提交成功!");
+							window.location.href="training course.html";
+						} else{
+							alert(data.desc);
+						}
+					}
+				}, "json");
+			}	
+	}
+	
+</script>
+</html>
+

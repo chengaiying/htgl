@@ -1,0 +1,358 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+<script src="../js/qswteckMap.js"></script>
+<script src="../js/ajaxfileupload.js"></script>
+<script src="../js/PictureCompress.js"></script>
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body>
+<div id="frame_content">
+<div id="frame_shade"></div>
+<div class="nav_link"><span class="nav_link_main">直报管理</span><span class="nav_link_page">/&nbsp;新增直报</span></div>
+<br />
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<form id="basic_info">
+<tr>
+  <td width="1%" align="right" nowrap class="form_item_name">表单名称</td>
+  <td nowrap class="form_item_input_td"><input type="text" name="formName" value="" size="20" placeholder="" class="info_frame_input">&nbsp;<input type="text" name="seq" value="" size="4" placeholder="排序权重" class="info_frame_input"></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">图标</td>
+  <td nowrap class="form_item_input_td"><select id="icon_form" name="icon" title="" class="info_frame_select">
+    <option value="form/icon/1.png">普通表单</option>
+    <option value="form/icon/2.png">金钱资助</option>
+    <option value="form/icon/3.png">统计图表</option>
+    <option value="form/icon/4.png">农作物</option>
+    <option value="form/icon/5.png">人员</option>
+    <option value="form/icon/6.png">房屋场地</option>
+    <option value="form/icon/7.png">田地</option>
+    <option value="form/icon/8.png">水产</option>
+    <option value="form/icon/9.png">证书</option>
+    <option value="form/icon/10.png">农机</option>
+</select><img id="J_imgHere" src="/storage/form/icon/1.png" height="40px" /></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">对象</td>
+  <td nowrap class="form_item_input_td">
+    <select name="flag" title="" class="info_frame_select">
+        <option value="0">所有</option>
+        <option value="1">农场主</option>
+        <option value="2">合作社</option>
+	</select>
+    </td>
+</tr>
+
+<tr>
+  <td align="right" nowrap class="form_item_name">简介</td>
+  <td nowrap class="form_item_input_td"><textarea name="formDesc" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+</tr>
+<tr>
+  <td align="right" nowrap class="form_item_name">指引图</td>
+  <td nowrap class="form_item_input_td">
+  <input id="form_boot_img" class="info_frame_file" type="file" name="form_boot_img" onChange="ajaxfile();" maxlength="10"/>
+  <span id="J_photoReplace" class="form_input_file_img" ><img id="J_imgHere" src="../img/nophoto.png" width="40px" /></span>
+  <span id="J_photoHere_wrap" class="form_input_file_photo" style="display: none;"><img id="J_photoHere" src="" width="40px" /></span>
+  </td>
+</tr>
+</form>
+<tr>
+  <td align="right" nowrap class="form_item_name" valign="top" style="padding-top:8px">字段列表</td>
+  <td nowrap class="form_item_input_td" valign="top">
+<form id="field_info">
+<table id="field_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+    <tr id="title_field_tr" class="data_frist_tr">
+    <td>序号</td>
+    <td>组别</td>
+      <td>显示名</td><td>字段名称</td><td>字段类型</td><td>必填</td><td>单位</td>
+      <td>小数点</td>
+      <td>下限</td>
+      <td>上限</td>
+      <td>选项数组</td>
+      <td>新增选项</td>
+      <td>分隔线</td>
+      <td>操作</td>
+    </tr>
+  
+  <tr id="add_field_tr">
+  
+    <td>-</td>
+    <td><input type="text" name="group" value="" size="2" placeholder="" class="word_frame_input"></td>
+    
+    <td><input type="text" name="display" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" name="paramName" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td>
+    <select id="" name="dataType" title="" class="word_frame_select">
+        <option value="1">文本</option>
+        <option value="2">数字</option>
+        <option value="3">选项</option>
+        <option value="4">文件</option>
+        <option value="5">日期</option>
+    </select>
+    </td>
+    <td><label><input name="required" type="checkbox" value="1" /></label> </td>
+    <td><input type="text" name="unit" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" name="dotNum" value="" size="4" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" name="minLimit" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td><input type="text" name="maxLimit" value="" size="8" placeholder="" class="word_frame_input"></td>
+    <td id="add_field_options_td"><a href="javascript:;" class="data_tb_btn">查看</a></td>
+    <td><input id="field_options" type="text"  value="" size="8" placeholder="" class="word_frame_input">&nbsp;<a href="javascript:;" class="data_tb_btn" onClick="addfieldoptions();">确定</a></td>
+    <td><label><input name="div" type="checkbox" value="1" /></label></td>
+    <td><a href="javascript:;" class="data_tb_btn"  onClick="addField();">确定</a></td>
+    
+  </tr>
+  
+</table>
+</form>
+<!--   <a href="javascript:;"><div class="btn5" onClick="myBtnClick(this,'#ffffff','');"><div class="btn5_txt">新增空白行</div></div></a>  -->
+  
+<br />  <br />  
+  
+  
+  
+  
+  
+  </td>
+</tr>
+<tr>
+  <td nowrap>&nbsp;</td>
+  <td nowrap class="form_item_input_td"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');addForm();"><div class="btn1_txt">确定</div></div></a></td>
+</tr>
+<tr>
+  <td></td>
+  <td></td>
+  </tr>
+</table>
+
+
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+<script type="text/javascript">
+	var titlefieldtr = "";
+	var addfieldtr = "";
+	var fieldoptionsfrist = "";
+	var fieldoptionsSecond = "";
+	
+	var fieldArray = new Array();
+	$(document).ready(function() {
+		addfieldtr = $("#add_field_tr").html();
+		addfieldtr = "<tr>" + addfieldtr + "</tr>" 
+		titlefieldtr = $("#title_field_tr").html();
+		titlefieldtr = "<tr class=\"data_frist_tr\">" + titlefieldtr + "</tr>";
+		
+		fieldoptionsfrist = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:300px;margin-left:-150px;\"><div class=\"PopTips\"><div class=\"popTipHeader\">选项列表</div><div class=\"phoneStyleDiv\"><center>";
+		fieldoptionsSecond = "</center></div><center><a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a></center></div></div></div>";
+		
+		$("#icon_form").change(function(){
+			var icon=$(this).children('option:selected').val();
+			$("#J_imgHere").attr("src","/storage/" + icon);
+		});
+		
+    });
+	
+	function addForm() {
+		var formjson = $("#basic_info").serializeJson();
+		formjson["formWords"] = fieldArray;
+		var formjsonString = JSON.stringify(formjson);
+		
+		$.post("/ViliageMgr/api/admin/form/addFormDef", {content:formjsonString},function(data, textStatus){
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					alert("提交成功!");
+					window.location.href='form_list.html';
+				} else if (data.code == 100){
+					alert("参数错误");
+				} else if (data.code == 2){
+					alert("用户已存在");
+				} else if (data.code == -1){
+					alert("失败");
+				} else if (data.code == -2){
+					alert("需要登录");
+				} else if (data.code == -6){
+					alert("无权限");
+				}
+			}
+		}, "json");
+	}
+	
+	function addField() {
+		//得到了添加字段的对象
+		var fieldjson = $("#field_info").serializeJson();
+		fieldArray.push(fieldjson);
+		
+		showField();
+		
+	}
+	
+	function showField() {
+		fieldoptionsfrist = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:300px;margin-left:-150px;\"><div class=\"PopTips\"><div class=\"popTipHeader\">选项列表</div><div class=\"phoneStyleDiv\"><center>";
+		fieldoptionsSecond = "</center></div><center><a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a></center></div></div></div>";
+		$("#field_table").empty();
+		$("#field_table").append(titlefieldtr);
+		
+		$.each(fieldArray, function(idx, value) {
+			var tmphtml = "";
+			tmphtml = tmphtml + "<tr>";
+			
+			tmphtml = tmphtml + "<td>" + (idx + 1) + "</td>";
+			
+			tmphtml = tmphtml + "<td>" + value.group + "</td>";
+			tmphtml = tmphtml + "<td>" + value.display + "</td>";
+			tmphtml = tmphtml + "<td>" + value.paramName + "</td>";
+			switch (value.dataType) {
+				case "1":
+				tmphtml = tmphtml + "<td>文本</td>";
+				break;
+				case "2":
+				tmphtml = tmphtml + "<td>数字</td>";
+				break;
+				case "3":
+				tmphtml = tmphtml + "<td>选项</td>";
+				break;
+				case "4":
+				tmphtml = tmphtml + "<td>文件</td>";
+				break;
+				case "5":
+				tmphtml = tmphtml + "<td>日期</td>";
+				break;
+				default:
+				tmphtml = tmphtml + "<td>未知</td>";
+				break;
+			}
+			if (value.required != null && value.required != undefined) {
+				if (value.required == "1") {
+					tmphtml = tmphtml + "<td>是</td>";
+				}
+				else {
+					tmphtml = tmphtml + "<td>否</td>";
+				}
+			}
+			else {
+				tmphtml = tmphtml + "<td>否</td>";
+			}
+			
+			tmphtml = tmphtml + "<td>" + value.unit + "</td>";
+			tmphtml = tmphtml + "<td>" + value.dotNum + "</td>";
+			tmphtml = tmphtml + "<td>" + value.minLimit + "</td>";
+			tmphtml = tmphtml + "<td>" + value.maxLimit + "</td>";
+			tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\"  onClick=\"popDivHandler(this);\">查看</a>";
+			tmphtml = tmphtml + fieldoptionsfrist;
+			if (value.options != null && value.options != undefined) {
+				if (typeof(value.options) == "string") {
+					tmphtml = tmphtml + value.options + "<br>";
+				}
+				else {
+					$.each(value.options, function(idx2, value2) {
+						tmphtml = tmphtml + value2 + "<br>";
+					});
+				}
+				
+			}
+			
+			tmphtml = tmphtml + fieldoptionsSecond;
+			tmphtml = tmphtml + "</td>";
+			tmphtml = tmphtml + "<td>-</td>";
+			if (value.div != null && value.div != undefined) {
+				if (value.div == "1") {
+					tmphtml = tmphtml + "<td>有</td>";
+				}
+				else {
+					tmphtml = tmphtml + "<td>无</td>";
+				}
+			}
+			else {
+				tmphtml = tmphtml + "<td>无</td>";
+			}
+			
+			tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\"  onClick=\"Delete(" + idx + ");\">删除</a></td>";
+			
+			tmphtml = tmphtml + "</tr>";
+			$("#field_table").append(tmphtml);
+			
+		});
+		$("#field_table").append(addfieldtr);
+	}
+	
+	function Delete(idx) {
+		fieldArray.splice(idx,1);
+		showField();
+	}
+	
+	function addfieldoptions() {
+		fieldoptionsfrist = fieldoptionsfrist + $("#field_options").val() + "<br>";
+		$("#add_field_options_td").empty();
+		$("#add_field_options_td").append("<a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"popDivHandler(this);\">查看</a>");
+		
+		fieldoptionsSecond = fieldoptionsSecond + "<input name=\"options\" type=\"checkbox\" checked=\"true\" value=\"" + $("#field_options").val() + "\" style=\"display:none\"/>";
+		var htmltmp = fieldoptionsfrist + fieldoptionsSecond;
+		$("#add_field_options_td").append(htmltmp);
+		$("#field_options").val("");
+	}
+	
+	//图片上传
+	function ajaxfile() {
+		
+		var files =  document.getElementById("form_boot_img").files;
+		for (var i = 0, f; f = files[i]; i++) {
+ 
+	      if (!f.type.match('image.*')) {
+	        continue;
+	      }
+	      console.log("size:" + f.size);
+		  var fsize = f.size;
+	      var reader = new FileReader();
+	      reader.onload = (function(theFile) {
+	        return function(e) {
+	          //var i = document.getElementById("J_imgHere_" + upid);
+			  var img = new Image();
+	          img.src = event.target.result;
+	          //$(i).css('width',$(i).width()/10+'px');
+			  var imgsrc = img.src;
+			  if (img.complete) {
+				  callback();
+			  }
+			  else {
+				  img.onload = callback;
+			  }
+			  function callback() {
+				  if (imgsrc.length > 102400) {
+					  imgsrc = compress(img,0.2);
+			 	  }
+				  
+				  $.post('/ViliageMgr/api/admin/file/uploadByBase64' , { file:imgsrc,file_param_name:"form_boot_img"}, function(data) {
+					  if (data.code==0) {
+						  $("#J_photoHere_wrap").show();
+				  	      $("#J_photoHere").attr('src', imgsrc);
+				          $("#J_photoReplace").hide();
+					  } 
+					  else {
+						  alert('上传失败');
+					  }
+				  }, "json");
+				  img = null;
+			  }
+	        };
+	      })(f);
+	      reader.readAsDataURL(f);
+	    }
+	}
+	
+</script>
+</html>

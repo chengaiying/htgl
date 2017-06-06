@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html><head>
+<meta charset="utf-8">
+<title>农业部服务窗</title>
+<link href="../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../css/html.css" rel="stylesheet" type="text/css" />
+<script src="../js/jquery-2.1.4.min.js"></script>
+<script src="../js/iframe.js"></script>
+<script src="../js/buttonStyle.js"></script> 
+<script src="../js/ajaxfileupload.js"></script>
+<script src="../js/PictureCompress.js"></script>
+
+<script src="../../echarts/echarts.min.js"></script>
+<script src="../../echarts/themes/macarons.js"></script>
+<script src="../../echarts/themes/infographic.js"></script>
+<script src="../../echarts/themes/shine.js"></script>
+</head>
+
+<body style="height:1200px">
+<div id="frame_content">
+<div id="frame_shade"></div>
+<div class="nav_link"><span class="nav_link_main">管理员管理</span><span class="nav_link_page">/&nbsp;机构列表</span></div>
+
+
+
+<br />
+<table id="org_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+  <tr class="data_frist_tr">
+    <td width="40px">序号</td>
+    <td>类型</td>
+    <td width="240px">机构名</td>
+    <td>图标</td>
+    <td>描述</td>
+    <td width="120px">操作</td>
+  </tr>
+</table>
+
+
+
+<br />
+<form>
+<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+<tr>
+  <td colspan="3" class="data_tb1_hd">新增机构</td>
+</tr>
+
+<tr><td class="data_tb1" width="1%" nowrap>
+  <select id="" name="type" title="" class="info_frame_select">
+    <option value="0">类型</option>
+    <option value="1">银行</option>
+    <option value="2">担保公司</option>
+  </select>
+  <input id="nameinfo" type="text" name="bank_name" value="" size="15" placeholder="请输入机构名称" class="info_frame_input">
+  <input id="descinfo" type="text" name="bank_desc" value="" size="20" placeholder="描述" class="info_frame_input">
+  
+  <input id="bank_icon" class="info_frame_file" type="file" name="bank_icon" onChange="ajaxfile();" maxlength="10"/>
+  
+  <span id="J_photoReplace" class="form_input_file_img" ><img id="J_imgHere" src="../img/nophoto.png" width="40px" /></span>
+  <span id="J_photoHere_wrap" class="form_input_file_photo" style="display: none;"><img id="J_photoHere" src="" width="40px" /></span>
+  
+</td>
+  <td class="data_tb1" nowrap>&nbsp;</td>
+
+<td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn1" onClick="myBtnClick(this,'#00AAEE','');AddOrg();"><div class="btn1_txt">新增</div></div></a>
+  </td>
+
+<!--<td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn2" onClick="myBtnClick(this,'#e6e6e6','');"><div class="btn2_txt">查询</div></div></a></td>-->
+</tr>
+
+<tr>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+</table>
+</form>
+
+
+
+
+
+</div><!--frame_content -->
+</body>
+
+<script type="text/javascript">
+	var orghead;
+	$(document).ready(function() {
+		orghead = $("#org_table").html();
+		
+		GetBankList();
+    });
+	
+	function GetBankList() {
+		$.post("/ViliageMgr/api/admin/loan/bankList", function(data, textStatus) {
+			if (textStatus == 'success' && data != null) {
+				if (data.code==0) {
+					$.each(data.result, function(n, value) {
+						if (value != null) {
+							var tmphtml;
+							tmphtml = "<tr>";
+							tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+							if (value.type == 1) {
+								tmphtml = tmphtml + "<td>银行</td>";
+							}
+							else if (value.type == 2) {
+								tmphtml = tmphtml + "<td>担保公司</td>";
+							}
+							tmphtml = tmphtml + "<td>" + value.bankName + "</td>";
+							tmphtml = tmphtml + "<td>" + "<img src=\"" + "/storage/" + value.bankIcon + "\" width=\"40px\" />" + "</td>";
+							if (value.bankDesc != null && value.bankDesc != undefined) {
+								if (value.bankDesc.length > 30) {
+									var popDiv = "<div class=\"popTipHeader\">"+value.bankName+"&nbsp;简介</div>";
+									popDiv += value.bankDesc;
+									popDiv = "<div class=\"needPopDiv\"><div class=\"PopContext\">"+
+											"<div class=\"PopTips\">"+popDiv+"<center>"+
+											"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;"+
+											"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a>"+
+											"</center></div>"+
+											"</div></div>";									
+									
+									tmphtml = tmphtml + "<td style=\"text-align:left;\">" + value.bankDesc.substring(0,30) + "...&nbsp;<a href=\"javascript:;\" onClick=\"popDivHandler(this);\">查看</a>"+popDiv+"</td>";
+								}
+								else {
+									tmphtml = tmphtml + "<td style=\"text-align:left;\">" + value.bankDesc + "</td>";
+								}								
+							}
+							else {
+								tmphtml = tmphtml + "<td style=\"text-align:left;\">无</td>";
+							}
+														
+							tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm(" + value.bankId + ")\">删除</a></td>";
+							tmphtml = tmphtml + "</tr>";
+							
+							$("#org_table").append(tmphtml);
+						}
+					});
+				}
+			}
+		}, 'json');
+	}
+	
+	
+	//图片上传
+	function ajaxfile() {
+		
+		var files =  document.getElementById("bank_icon").files;
+		for (var i = 0, f; f = files[i]; i++) {
+ 
+	      if (!f.type.match('image.*')) {
+	        continue;
+	      }
+	      console.log("size:" + f.size);
+		  var fsize = f.size;
+	      var reader = new FileReader();
+	      reader.onload = (function(theFile) {
+	        return function(e) {
+	          //var i = document.getElementById("J_imgHere_" + upid);
+			  var img = new Image();
+	          img.src = event.target.result;
+	          //$(i).css('width',$(i).width()/10+'px');
+			  var imgsrc = img.src;
+			  if (img.complete) {
+				  callback();
+			  }
+			  else {
+				  img.onload = callback;
+			  }
+			  function callback() {
+				  if (imgsrc.length > 102400) {
+					  imgsrc = compress(img,0.2);
+			 	  }
+				  
+				  $.post('/ViliageMgr/api/admin/file/uploadByBase64' , { file:imgsrc,file_param_name:"bank_icon"}, function(data) {
+					  if (data.code==0) {
+						  $("#J_photoHere_wrap").show();
+				  	      $("#J_photoHere").attr('src', imgsrc);
+				          $("#J_photoReplace").hide();
+					  } 
+					  else {
+						  alert('上传失败');
+					  }
+				  }, "json");
+				  img = null;
+			  }
+	        };
+	      })(f);
+	      reader.readAsDataURL(f);
+	    }
+	}
+	
+	function AddOrg() {
+		$.post("/ViliageMgr/api/admin/loan/addBank", $("form").serialize(), function(data, textStatus){
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					$("#org_table").empty();
+					$("#org_table").append(orghead);
+					GetBankList();
+					$("#nameinfo").val("");
+					$("#descinfo").val("");
+					$("#bank_icon").val("");
+					$("#J_photoHere_wrap").hide();
+				  	$("#J_photoHere").attr('src', '');
+				    $("#J_photoReplace").show();
+					alert("提交成功!");
+				} else if (data.code == 100){
+					alert("参数错误");
+				} else if (data.code == 2){
+					alert("用户已存在");
+				} else if (data.code == -1){
+					alert("失败");
+				} else if (data.code == -2){
+					alert("需要登录");
+				} else if (data.code == -6){
+					alert("无权限");
+				}
+			}
+		}, "json");
+	}
+	//		删除前执行,确认删除,取消删除
+	function show_confirm(bankid){
+		var r=confirm("确定删除？");
+		if (r==true)
+		  {
+		 	DeleteOrg(bankid)
+		  }
+		
+	}	
+	function DeleteOrg(bankid) {
+		$.post("/ViliageMgr/api/admin/loan/delBank", {bank_id:bankid},function(data, textStatus){
+			if (textStatus == 'success' && data != null) {
+				if (data.code == 0) {
+					$("#org_table").empty();
+					$("#org_table").append(orghead);
+					GetBankList();
+					alert("提交成功!");
+				} else if (data.code == 100){
+					alert("参数错误");
+				} else if (data.code == 2){
+					alert("用户已存在");
+				} else if (data.code == -1){
+					alert("失败");
+				} else if (data.code == -2){
+					alert("需要登录");
+				} else if (data.code == -6){
+					alert("无权限");
+				}
+			}
+		}, "json");
+	}
+	
+</script>
+</html>

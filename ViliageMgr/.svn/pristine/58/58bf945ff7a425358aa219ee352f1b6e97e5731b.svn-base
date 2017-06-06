@@ -1,0 +1,25 @@
+package com.moa.mgr.controller;
+import org.slf4j.LoggerFactory;
+
+import com.jfinal.aop.Before;
+import com.jfinal.core.Controller;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.service.FileService;
+
+public class FileController extends Controller {
+	private static final String TAG = "FileController";
+	
+	@Before(TokenInterceptor.class)
+	public void uploadByBase64() {
+		ResultInfo<String> ret = new ResultInfo<String>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = FileService.uploadBase64(this);
+		} catch (Exception e) { 
+			LoggerFactory.getLogger(TAG).error("upload file error:" + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+
+}

@@ -1,0 +1,564 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/qswteckMap.js"></script>
+
+		<script src="../../echarts/echarts.min.js"></script>
+		<script src="../../echarts/themes/macarons.js"></script>
+		<script src="../../echarts/themes/infographic.js"></script>
+		<script src="../../echarts/themes/shine.js"></script>
+	</head>
+
+	<body>
+		<div id="frame_content">
+			<div id="frame_shade"></div>
+			<div class="nav_link"><span class="nav_link_main">管理员管理</span><span class="nav_link_page">/&nbsp;管理员列表</span></div>
+
+			<table width="200px" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td><input id="userName" name="userName" type="text" value="" size="20" placeholder="用户名" class="info_frame_input"></td>
+					<td>
+						<select id="userType" name="type" title="" class="info_frame_select">
+							<option value="">请选择用户类型</option>
+							<option value="1">超级管理员</option>
+							<option value="2"> 普通管理员</option>
+							<option value="3">机构管理员</option>
+							<option value="4">地区管理员</option>
+							<option value="5">保险管理员</option>
+							<!--<option value="6">服务管理员</option>-->
+						</select>
+					</td>
+					<td style="padding-right:20px;">
+						<a href="javascript:;">
+							<div id="query_btn" class="btn1" onClick="GetUserList(2)">
+								<div class="btn1_txt">查询</div>
+							</div>
+						</a>
+					</td>
+				</tr>
+			</table>
+
+			<br />
+			<table id="user_table" width="100%" border="0" cellspacing="0" cellpadding="0" class="data_table">
+				<tr class="data_frist_tr">
+					<td>序号</td>
+					<td>类型</td>
+					<td>机构</td>
+					<td>用户名</td>
+					<td>联系方式</td>
+					<td>操作</td>
+				</tr>
+			</table>
+			<br />
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="padding-right:10px;">
+
+						<a href="javascript:;">
+							<div id="up_page_btn" class="btn3" onClick="GetUserList(0)">
+								<div class="btn3_txt">上一页</div>
+							</div>
+						</a>
+					</td>
+					<td>
+						<a href="javascript:;">
+							<div id="down_page_btn" class="btn3" onClick="GetUserList(1)">
+								<div class="btn3_txt">下一页</div>
+							</div>
+						</a>
+					</td>
+					<td width="99%" align="right">
+						<span id="page_num" class="txt1">第1页/共1页</span>
+					</td>
+				</tr>
+			</table>
+
+			<br />
+			<form>
+				<input type="hidden" id="region_id" name="region_id" value="">
+				<table border="0" cellspacing="0" cellpadding="0" width="100%" class="data_tb1_table">
+					<tr>
+						<td colspan="4" class="data_tb1_hd">新增管理员</td>
+					</tr>
+					<tr>
+						<td class="data_tb1" width="1%" nowrap>
+
+							<select id="admin_select" name="type" title="" class="info_frame_select">
+								<option value="1">请选择用户类型</option>
+								<!-- <option value="1">超级管理员</option>-->
+								<option value="2">系统管理员</option>
+								<option value="3">机构管理员</option>
+								<option value="4">地区管理员</option>
+								<option value="5">保险管理员</option>
+								<!--<option value="6">服务管理员</option>-->
+							</select>
+							<select id="org_select" name="bank_id" title="" class="info_frame_select" style="display:none">
+								<option value="0">请选择机构</option>
+								
+							</select>
+							<select id="org_select1" name="insurer_id" title="" class="info_frame_select" style="display:none">
+								<option value="0">请选择保险公司</option>
+								
+							</select>
+							<select id="c_provice" title="" class="info_frame_select" onchange="GetCityList()" style="display:none">
+								<option value="">--省--</option>
+							</select>
+							<select id="c_city" title="" class="info_frame_select" onchange="GetCountyList()" style="display:none">
+								<option value="">--市--</option>
+							</select>
+							<select id="c_xian" title="" class="info_frame_select" onchange="selected()" style="display:none">
+								<option value="">--县--</option>
+							</select>
+
+							<!--<ul id="c_org_select" style="display:none;display: inline-block;" class="info_frame_select">
+        <li value="1" style="display: inline-block;">地区选择</li>        
+        <li value="1" id="c_provice" style="display: inline-block; border: 1px gray solid;" onclick="">--省--</li>
+        <li value="1" id="c_city" style="display: inline-block;border: 1px gray solid;">--市--</li>
+        <li value="1" id="c_xian" style="display: inline-block;border: 1px gray solid;">--县--</li>
+    </ul>-->
+
+							<input id="userinfo" name="user_name" type="text" value="" size="15" placeholder="请设置登陆名" class="info_frame_input">
+							<input id="pswinfo" name="pswd" type="password" value="" size="15" placeholder="登陆密码" class="info_frame_input">
+							<input id="phoneinfo" name="phone" type="text" value="" size="20" placeholder="联系方式" class="info_frame_input">
+						</td>
+						<td class="data_tb1">
+							<div id="permissions_check" class="info_check_group" style="display:none">权限设置
+								<label><input name="permissions" type="checkbox" value="100" />直报</label>
+								<label><input name="permissions" type="checkbox" value="101" />贷款</label>
+								<label><input name="permissions" type="checkbox" value="102" />大数据</label>
+								<label><input name="permissions" type="checkbox" value="103" />系统设置</label>
+							</div>
+						</td>
+
+						<td class="data_tb1" width="1%">
+							<a href="javascript:;">
+								<div class="btn1" onClick="myBtnClick(this,'#00AAEE','');AddUser();">
+									<div class="btn1_txt">新增</div>
+								</div>
+							</a>
+						</td>
+						<!--<td class="data_tb1" width="1%"><a href="javascript:;"><div class="btn2" onClick="myBtnClick(this,'#e6e6e6','');"><div class="btn2_txt">查询</div></div></a></td>-->
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				</table>
+			</form>
+
+		</div>
+		<!--frame_content -->
+	</body>
+
+	<script type="text/javascript">
+		var bankMap = new Map();
+		var insurerMap=new Map();
+		var userhead;
+		var page = 1;
+
+		$(document).ready(function() {
+			userhead = $("#user_table").html();
+			$.ajaxSetup({
+				async: false
+			});
+			GetBankList();
+			GetInsuList();
+			GetUserList(2);
+			$('#admin_select').change(function() {
+				var admin = $(this).children('option:selected').val();
+				var htmltmp = "";
+				if(admin == 2) { /*系统管理员权限设置*/
+					$("#org_select").hide();
+					$("#c_provice").hide();
+					$("#c_city").hide();
+					$("#c_xian").hide();
+					$("#org_select1").hide();
+					//清空region_id
+					$("#region_id").val("");
+					$("#permissions_check").empty();
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"100\" checked=\"true\"/>管理员查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"101\" checked=\"true\"/>新增管理员</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"104\" checked=\"true\"/>新增金融机构</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"106\" checked=\"true\"/>新增保险公司</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"108\" checked=\"true\"/>新增服务公司</label>";
+					/*htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"200\" checked=\"true\"/>机构管理员查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"201\" checked=\"true\"/>新增机构管理员</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"202\" checked=\"true\"/>删除机构管理员</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"203\" checked=\"true\"/>修改机构管理员信息</label>";*/
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"300\" checked=\"true\"/>直报表单查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"301\" checked=\"true\"/>新增直报表单</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"302\" checked=\"true\"/>删除直报表单</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"303\" checked=\"true\"/>修改直报表单</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"400\" checked=\"true\"/>贷款产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"800\" checked=\"true\"/>保险产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"900\" checked=\"true\"/>服务产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"500\" checked=\"true\"/>全部贷款信息查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"804\" checked=\"true\"/>全部保险信息查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"904\" checked=\"true\"/>全部服务信息查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"600\" checked=\"true\"/>查看农户名录</label>";
+					$("#permissions_check").append(htmltmp);
+				} else if(admin == 3) { /*机构管理员权限设置*/
+					$("#c_provice").hide();
+					$("#c_city").hide();
+					$("#c_xian").hide();
+					$("#org_select1").hide();
+					$("#org_select").show();
+					//清空region_id
+					$("#region_id").val("");
+					$("#permissions_check").empty();
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"400\" checked=\"true\"/>贷款产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"401\" checked=\"true\"/>新增贷款产品</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"402\" checked=\"true\"/>删除贷款产品</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"403\" checked=\"true\"/>修改贷款产品</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"501\" checked=\"true\"/>贷款信息查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"502\" checked=\"true\"/>贷款审批操作</label>";
+					$("#permissions_check").append(htmltmp);
+				} else if(admin == 4) {
+					//TODO
+					$("#org_select").hide();
+					$("#org_select1").hide();
+					$("#c_provice").show();
+					$("#c_city").show();
+					$("#c_xian").show();
+					//清空region_id
+					$("#region_id").val("");
+					GetProvinceList();
+					$("#permissions_check").empty();
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"300\" checked=\"true\"/>直报表单查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"301\" checked=\"true\"/>新增直报表单</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"302\" checked=\"true\"/>删除直报表单</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"303\" checked=\"true\"/>修改直报表单</label>";
+//					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"400\" checked=\"true\"/>贷款产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"500\" checked=\"true\"/>全部贷款信息查看</label>";
+//					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"800\" checked=\"true\"/>保险产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"804\" checked=\"true\"/>全部保险信息查看</label>";
+//					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"900\" checked=\"true\"/>服务产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"904\" checked=\"true\"/>全部服务信息查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"600\" checked=\"true\"/>查看农户名录</label>";
+					$("#permissions_check").append(htmltmp);
+				}else if(admin == 5) {
+					//TODO
+					$("#c_provice").hide();
+					$("#c_city").hide();
+					$("#c_xian").hide();
+					$("#org_select").hide();
+					$("#org_select1").show();
+					//清空region_id
+					$("#region_id").val("");
+//					GetProvinceList();
+					$("#permissions_check").empty();
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"800\" checked=\"true\"/>保险产品查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"801\" checked=\"true\"/>新增保险产品</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"802\" checked=\"true\"/>删除保险产品</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"803\" checked=\"true\"/>修改保险产品</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"805\" checked=\"true\"/>保险信息查看</label>";
+					htmltmp = htmltmp + "<label><input name=\"permissions\" type=\"checkbox\" value=\"806\" checked=\"true\"/>保险审批操作</label>";
+					$("#permissions_check").append(htmltmp);
+				}
+			});
+		});
+
+		function GetUserList(state) {
+			if(state == 1) {
+				var down_page_btn = document.getElementById("down_page_btn");
+				myBtnClick(down_page_btn, '#ffffff', '');
+				if(page >= totalPage) {
+					return;
+				}
+				page = page + 1;
+			} else if(state == 2) {
+				page = 1;
+			} else if(state == 0) {
+				var up_page_btn = document.getElementById("up_page_btn");
+				myBtnClick(up_page_btn, '#ffffff', '');
+				if(page == 1) {
+					return;
+				}
+				page = page - 1;
+			}
+
+			var query_btn = document.getElementById("query_btn");
+			var userName = $("#userName").val();
+			var userType = $("#userType").val();
+			myBtnClick(query_btn, '#00AAEE', '');
+			$.post("/ViliageMgr/api/admin/mgr/mgrList?userName=" + userName + "&type=" + userType + "&page=" + page, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$("#user_table").empty();
+						$("#user_table").append(userhead);
+						totalPage = data.result.totalPage;
+						$("#page_num").html("共" + data.result.totalRow + "行 " + "第" + data.result.pageNumber + "页/共" + data.result.totalPage + "页");
+						$.each(data.result.list, function(n, value) {
+							if(value != null) {
+								var tmphtml;
+								tmphtml = "<tr>";
+								tmphtml = tmphtml + "<td>" + (n + 1) + "</td>";
+								switch(value.type) {
+									case 1:
+										tmphtml = tmphtml + "<td>超级管理员</td><td>系统</td>";
+										break;
+									case 2:
+										tmphtml = tmphtml + "<td>系统管理员</td><td>系统</td>";
+										break;
+									case 3:
+										tmphtml = tmphtml + "<td>机构管理员</td>";
+										var bank = bankMap.get(value.bankId);
+										tmphtml = tmphtml + "<td>" + bank.bankName + "</td>";
+										break;
+									case 4:
+										tmphtml = tmphtml + "<td>地区管理员</td><td>系统</td>";
+										break;
+									case 5:
+										tmphtml = tmphtml + "<td>保险管理员</td>";
+										var insurer = insurerMap.get(value.insurerId);
+										tmphtml = tmphtml + "<td>" + insurer.insurerName + "</td>";
+										break;
+									/* case 6:
+										tmphtml = tmphtml + "<td>机构管理员</td>";
+										var bank = bankMap.get(value.bankId);
+										tmphtml = tmphtml + "<td>" + bank.bankName + "</td>";
+										break; */
+									default:
+										tmphtml = tmphtml + "<td>其他</td><td>系统</td>";
+										break;
+								}
+//								if(value.bankId == 0) {
+
+//									tmphtml = tmphtml + "<td>系统</td>";
+
+//								} else {
+
+//									var bank = bankMap.get(value.bankId);
+
+//									tmphtml = tmphtml + "<td>" + bank.bankName + "</td>";
+
+//								}
+								tmphtml = tmphtml + "<td>" + value.userName + "</td>";
+
+								if(value.phone == undefined || value.phone == null) {
+									tmphtml = tmphtml + "<td></td>";
+								} else {
+									tmphtml = tmphtml + "<td>" + value.phone + "</td>";
+								}
+
+								var perTest = "<div class=\"popTipHeader\">" + value.userName + "&nbsp;拥有如下权限</div>";
+								$.each(value.permissions, function(n, pervalue) {
+									if(pervalue != null) {
+										perTest = perTest + pervalue.name + "<br />";
+									}
+								});
+								perTest = "<div class=\"needPopDiv\"><div class=\"PopContext\" style=\"width:400px;margin-left:-200px;\">" +
+									"<div class=\"PopTips\" style=\"text-align:center;\">" + perTest + "<center>" +
+									"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">确定</div></div></a>&nbsp;&nbsp;&nbsp;&nbsp;" +
+									"<a href=\"javascript:;\"><div class=\"btn4\" onClick=\"myBtnClick(this,'#ffffff','');popDivClose(this);\"><div class=\"btn4_txt\">关闭</div></div></a>" +
+									"</center></div>" +
+									"</div></div>";
+
+								tmphtml = tmphtml + "<td><a href=\"javascript:;\" class=\"data_tb_btn\" onClick=\"show_confirm('" + value.userName + "')\">删除</a>&nbsp;<a href=\"javascript:;\" onClick=\"popDivHandler(this);\" class=\"data_tb_btn\">权限</a>" + perTest + "</td>";
+								tmphtml = tmphtml + "</tr>";
+								$("#user_table").append(tmphtml);
+							}
+						});
+					} else if(data.code == -6) {
+						alert("无权限");
+					} else {
+						alert("获取表失败，请重新登录！");
+					}
+				}
+			}, 'json');
+		}
+		function GetBankList() {
+			$.post("/ViliageMgr/api/admin/loan/bankList", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$.each(data.result, function(n, value) {
+							if(value != null) {
+								var bank = new Object();
+								bank.bankId = value.bankId;
+								bank.bankType = value.type;
+								bank.bankName = value.bankName;
+								bank.bankIcon = value.bankIcon;
+								bank.bankDesc = value.bankDesc;
+								bankMap.remove(bank.bankId);
+								bankMap.put(bank.bankId, bank);
+								var tmphtml;
+								tmphtml = "<option value=\"" + bank.bankId + "\">" + bank.bankName + "</option>";
+								$("#org_select").append(tmphtml);
+							}
+						});
+					}
+				}
+			}, 'json');
+		}
+		function GetInsuList() {
+			$.post("/ViliageMgr/api/admin/insurer/insurerList", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						$.each(data.result, function(n, value) {
+							if(value != null) {
+								var insurer = new Object();
+								insurer.insurerId = value.id;
+								insurer.insurerType = value.type;
+								insurer.insurerName = value.insurer_name;
+								insurer.insurerIcon = value.insurer_icon;
+								insurer.insurerDesc = value.insurer_desc;
+								insurerMap.remove(insurer.insurerId);
+								insurerMap.put(insurer.insurerId, insurer);
+								var tmphtml;
+								tmphtml = "<option value=\"" + insurer.insurerId + "\">" + insurer.insurerName + "</option>";
+								$("#org_select1").append(tmphtml);
+							}
+						});
+					}
+				}
+			}, 'json');
+		}
+
+		function AddUser() {
+			var admin = $('#admin_select').children('option:selected').val();
+			
+			if(admin == 4){
+				if($("#c_provice").val()==""){
+					alert("请选择地区");
+					return 
+				}
+			}
+			$.post("/ViliageMgr/api/admin/mgr/addMgr", $("form").serialize(), function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						//					$("#user_table").empty();
+						//					$("#user_table").append(userhead);
+						GetUserList();
+						$("#userinfo").val("");
+						$("#pswinfo").val("");
+						$("#phoneinfo").val("");
+						//$("#org_select").hide();
+						//alert("提交成功!");
+					} else if(data.code == 100) {
+						alert("参数错误");
+					} else if(data.code == 2) {
+						alert("用户已存在");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+		//		删除前执行,确认删除,取消删除
+		function show_confirm(userName) {
+			var r = confirm("确定删除？");
+			if(r == true) {
+				DeleteUser(userName)
+			} else {
+
+			}
+		}
+
+		function DeleteUser(userName) {
+			$.post("/ViliageMgr/api/admin/mgr/delMgr", {
+				user_name: userName
+			}, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					if(data.code == 0) {
+						//					$("#user_table").empty();
+						//					$("#user_table").append(userhead);
+						GetUserList();
+
+						alert("提交成功!");
+					} else if(data.code == 100) {
+						alert("参数错误");
+					} else if(data.code == 2) {
+						alert("用户已存在");
+					} else if(data.code == -1) {
+						alert("失败");
+					} else if(data.code == -2) {
+						alert("需要登录");
+					} else if(data.code == -6) {
+						alert("无权限");
+					}
+				}
+			}, "json");
+		}
+		//获取省列表	province
+		function GetProvinceList() {
+			//清空省
+			$("#c_provice").empty();
+			$("#c_provice").html("<option value=\"\">--省--</option>")
+			$("#c_city").html("<option value=\"\">--市--</option>")
+			$("#c_xian").html("<option value=\"\">--县--</option>")
+			$.post("/ViliageMgr/api/admin/region/getProvnice", function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					$.each(data.result, function(n, value) {
+						var optionData = "<option value=\"" + value.regionId + "\">" + value.regionName + "</option>";
+						$("#c_provice").append(optionData);
+					});
+				}
+			}, "json");
+			//$("#region_id").val($("#c_provice").val());
+		}
+
+		//
+		//获取市列表
+		function GetCityList() {
+			var provinceId = $("#c_provice").val();
+			//清空市
+			$("#c_city").empty();
+			$("#c_xian").empty();
+			$("#c_city").html("<option value=\"\">--市--</option>")
+			$("#c_xian").html("<option value=\"\">--县--</option>")
+			$.post("/ViliageMgr/api/admin/region/getCity?provinceId=" + provinceId, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+					//
+					$.each(data.result, function(n, value) {
+
+						var optionData = "<option value=\"" + value.regionId + "\">" + value.regionName + "</option>";
+						$("#c_city").append(optionData);
+
+					});
+
+				}
+			}, "json");
+			$("#region_id").val($("#c_provice").val());
+		}
+		//
+		//获取县列表
+		function GetCountyList() {
+			//清空县
+			$("#c_xian").empty();
+			$("#c_xian").html("<option value=\"\">--县--</option>")
+			var cityId = $("#c_city").val();
+			var provinceId = $("#c_provice").val();
+			$.post("/ViliageMgr/api/admin/region/getArea?cityId=" + cityId + "&provinceId=" + provinceId, function(data, textStatus) {
+				if(textStatus == 'success' && data != null) {
+
+					$.each(data.result, function(n, value) {
+
+						var optionData = "<option value=\"" + value.regionId + "\">" + value.regionName + "</option>";
+						$("#c_xian").append(optionData);
+
+					});
+				}
+			}, "json");
+			$("#region_id").val($("#c_city").val());
+		}
+
+		function selected() {
+			$("#region_id").val($("#c_xian").val());
+		}
+	</script>
+
+</html>

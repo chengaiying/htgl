@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>农业部服务窗</title>
+		<link href="../css/style.css" rel="stylesheet" type="text/css" />
+		<link href="../css/html.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="dist/css/wangEditor.min.css" />
+		<script src="../js/jquery-2.1.4.min.js"></script>
+		<script src="../js/iframe.js"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/ajaxfileupload.js"></script>
+		<script src="../js/PictureCompress.js"></script>
+		<script src="dist/js/wangEditor.js" type="text/javascript" charset="utf-8"></script>
+		<script src="dist/js/biaoqing.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/buttonStyle.js"></script>
+		<script src="../js/qswteckMap.js"></script>
+		<style type="text/css">
+			.form_item_input_td a {
+				float: left;
+				margin-right: 20px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="frame_content">
+			<form action="">
+			<div class="nav_link"><span class="nav_link_main">新闻中心</span><span class="nav_link_page">/&nbsp;新闻修改</span></div>
+			<table border="0" cellspacing="0" cellpadding="0" width="100%">
+				<form id="basic_info"></form>
+				<tr>
+					<td width="1%" align="right" nowrap="" class="form_item_name">请选择新闻发布方式：</td>
+					<td class="form_item_input_td">
+						<select id="newsType1" name="addtype" title="" class="info_frame_select" style="width: 300px;">
+							<option value="0">连接发布</option>
+							<option value="1">自定义内容发布</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td width="1%" align="right" nowrap="" class="form_item_name">请选择新闻类型：</td>
+					<td class="form_item_input_td">
+						<select id="newsType" name="type" title="" class="info_frame_select" style="width: 300px;">
+							<option value="1">政策前沿</option>
+							<option value="2">补贴动态</option>
+							<option value="3">市场行情</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td width="1%" align="right" nowrap="" class="form_item_name">新闻名称：</td>
+					<td nowrap="" class="form_item_input_td">
+						<input id="news_name" name="title" type="text" value="" size="60" placeholder="请设置新闻名称" class="info_frame_input">
+					</td>
+				</tr>
+				<!--<tr>
+					<td align="right" nowrap class="form_item_name">标题图标：</td>
+					<td nowrap class="form_item_input_td">
+						<input id="fiprod_icon" class="info_frame_file" type="file" name="news_icon" onChange="ajaxfile();" maxlength="10" />
+						<span id="J_photoReplace" class="form_input_file_img"><img id="J_imgHere" src="../img/nophoto.png" width="40px" /></span>
+						<span id="J_photoHere_wrap" class="form_input_file_photo" style="display: none;"><img id="J_photoHere" src="" width="40px" /></span>
+					</td>
+				</tr>-->
+				<tr class="link" >
+					<td align="right" nowrap="" class="form_item_name">新闻连接：</td>
+					<td nowrap="" class="form_item_input_td"><textarea id="news_link" name="news_url" class="info_frame_textarea" size="60" rows="10"></textarea></td>
+				</tr>
+				<tr class="content" style="display: none;">
+					<td align="right" nowrap="" class="form_item_name">新闻内容：</td>
+					<td width="100%"><textarea id="news_content" name="news_content" class="info_frame_textarea" cols="80" rows="10"></textarea></td>
+				</tr>
+
+				<tr>
+					<td nowrap="">&nbsp;</td>
+					<td class="form_item_input_td">
+						<a href="javascript:;">
+							<div class="btn1" onClick="myBtnClick(this,'#00AAEE','');AddUser();">
+								<div class="btn1_txt">新增</div>
+							</div>
+						</a>
+					</td>
+				</tr>
+			</table>
+		</form>
+		</div>
+	</body>
+	<script type="text/javascript">
+	
+
+			var editor = new wangEditor('news_content');
+			//			配置菜单
+			editor.config.menus = [
+				'source',
+				'|',
+				'bold',
+				'underline',
+				'italic',
+				'strikethrough',
+				'eraser',
+				'forecolor',
+				'bgcolor',
+				'|',
+				'quote',
+				'fontfamily',
+				'fontsize',
+				'head',
+				'unorderlist',
+				'orderlist',
+				'alignleft',
+				'aligncenter',
+				'alignright',
+				'|',
+				'link',
+				'unlink',
+				'table',
+				'emotion',
+				'|',
+				'img',
+				'video',
+				'location',
+				'insertcode',
+				'|',
+				'undo',
+				'redo',
+				'fullscreen'
+			];
+			editor.config.emotions = {
+				// 第一组，id叫做 'default' 
+				'default': {
+					title: '默认', // 组名称
+					data: a // 服务器的一个json文件url，例如官网这里配置的是 http://www.wangeditor.com/wangEditor/test/emotions.data
+				},
+			};
+			//				上传图片
+			editor.config.uploadImgUrl = '/ViliageMgr/api/admin/file/uploadNews';
+
+			// 配置自定义参数（举例）
+			editor.config.uploadParams = {
+
+			};
+        // 自定义上传事件
+        editor.config.uploadImgFns.onload = function (resultText, xhr) {
+            // resultText 服务器端返回的text
+            // xhr 是 xmlHttpRequest 对象，IE8、9中不支持
+
+            // 上传图片时，已经将图片的名字存在 editor.uploadImgOriginalName
+            var originalName = editor.uploadImgOriginalName || '';  
+            alert(resultText);
+            // 如果 resultText 是图片的url地址，可以这样插入图片：
+            editor.command(null, 'insertHtml', '<img src="' + resultText + '" alt="' + originalName + '" style="max-width:100%;"/>');
+            // 如果不想要 img 的 max-width 样式，也可以这样插入：
+            // editor.command(null, 'InsertImage', resultText);
+        };
+			editor.create();
+
+		
+
+		//	增加
+		function AddUser() {
+			if($("#news_name").val() == "") {
+				alert("新闻名不能为空!")
+			} else {
+				$.post("/ViliageMgr/api/admin/news/addNews", $("form").serialize(),
+					function(data, textStatus) {
+						if(textStatus == 'success' && data != null) {
+							if(data.code == 0) {
+								$("#news_name").val("");
+								$("#news_link").val("");
+								editor.$txt.html('<p><br></p>');
+								alert("新增成功!");
+								
+							} else {
+								alert(data.desc);
+							}
+						}
+					}, "json");
+			}
+		}
+		$("#newsType1").change(function() {
+			if($("#newsType1").val() == 1) {
+				$(".content").show();
+				$(".link").hide();
+			} else {
+				$(".link").show();
+				$(".content").hide();
+			}
+		})
+
+		//图片上传
+		function ajaxfile() {
+
+			var files = document.getElementById("fiprod_icon").files;
+			for(var i = 0, f; f = files[i]; i++) {
+
+				if(!f.type.match('image.*')) {
+					continue;
+				}
+				console.log("size:" + f.size);
+				var fsize = f.size;
+				var reader = new FileReader();
+				reader.onload = (function(theFile) {
+					return function(e) {
+						var img = new Image();
+						img.src = event.target.result;
+						var imgsrc = img.src;
+						if(img.complete) {
+							callback();
+						} else {
+							img.onload = callback;
+						}
+
+						function callback() {
+							if(imgsrc.length > 102400) {
+								imgsrc = compress(img, 0.2);
+							}
+
+							$.post('/ViliageMgr/api/admin/file/uploadByBase64', {
+								file: imgsrc,
+								file_param_name: "news_icon"
+							}, function(data) {
+								if(data.code == 0) {
+									$("#J_photoHere_wrap").show();
+									$("#J_photoHere").attr('src', imgsrc);
+									$("#J_photoReplace").hide();
+								} else {
+									alert('上传失败');
+								}
+							}, "json");
+							img = null;
+						}
+					};
+				})(f);
+				reader.readAsDataURL(f);
+			}
+		}
+	</script>
+
+</html>

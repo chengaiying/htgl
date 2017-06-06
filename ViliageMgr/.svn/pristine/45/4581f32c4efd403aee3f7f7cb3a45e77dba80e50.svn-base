@@ -1,0 +1,112 @@
+package com.moa.mgr.controller;
+
+
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.LoggerFactory;
+
+import com.jfinal.aop.Before;
+import com.jfinal.core.Controller;
+import com.moa.mgr.TokenInterceptor;
+import com.moa.mgr.result.ResultCodes;
+import com.moa.mgr.result.ResultInfo;
+import com.moa.mgr.result.obj.EmptyResultObj;
+import com.moa.mgr.service.InsurerService;
+
+import com.moa.mgr.service.insurer.Insurer;
+
+
+public class InsererMgrController extends Controller{
+	private static final String TAG = "InsererMgrController";
+	/*
+	 * 新增保险公司
+	 */
+	@Before(TokenInterceptor.class)
+	public void addInsurer() {
+		ResultInfo<Insurer> ret = new ResultInfo<Insurer>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = InsurerService.addInsurer(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("add Insurer error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	/** 保险公司列表 */
+	//@Before(TokenInterceptor.class)
+	public void insurerList() {
+		ResultInfo<List<Map<String,Object>>> ret = new ResultInfo<List<Map<String,Object>>>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = InsurerService.insurerList(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error(" Insurer list error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	/*
+	 * 删除保险公司
+	 */
+	@Before(TokenInterceptor.class)
+	public void deleteInsurer() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<EmptyResultObj>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = InsurerService.deleteInsurer(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("delete insurer error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+	/** 保险产品列表 */
+	@Before(TokenInterceptor.class)
+	public void insprodList() {
+	ResultInfo<List<Map<String,Object>>> ret = new ResultInfo<List<Map<String,Object>>>(ResultCodes.RET_UNKNOWN_ERROR);
+	try {
+		ret = InsurerService.insprodList(this);
+	} catch (Exception e) {
+		LoggerFactory.getLogger(TAG).error(" Insprod list error: " + e.getMessage());
+	}
+	renderText(ret.toJson());}
+	/*
+	 * 新增保险产品
+	 */
+	@Before(TokenInterceptor.class)
+	public void addInsprod() {
+		ResultInfo<Map<String, Object>> ret = new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = InsurerService.addInsprod(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("add Insprod error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	/*
+	 * 删除保险产品
+	 */
+	@Before(TokenInterceptor.class)
+	public void delteInsprod() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = InsurerService.delteInsprod(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("delete Insprod error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	/*
+	 * 修改保险产品状态
+	 */
+	@Before(TokenInterceptor.class)
+	public void setInsprodStatus() {
+		ResultInfo<EmptyResultObj> ret = new ResultInfo<>(ResultCodes.RET_UNKNOWN_ERROR);
+		try {
+			ret = InsurerService.setInsprodStatus(this);
+		} catch (Exception e) {
+			LoggerFactory.getLogger(TAG).error("set Insprod status error: " + e.getMessage());
+		}
+		renderText(ret.toJson());
+	}
+	
+
+}

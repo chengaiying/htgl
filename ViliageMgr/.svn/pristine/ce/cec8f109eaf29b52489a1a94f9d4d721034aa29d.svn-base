@@ -1,0 +1,23 @@
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" href="assets/css/reset.css"/>
+<link rel="stylesheet" type="text/css" href="assets/css/style.css"/>
+<link rel="stylesheet" type="text/css" href="assets/css/payment.css"/>
+<title>管理平台首页</title>
+</head>
+
+<body>
+
+<p>
+	<a href="login.html">管理员登录</a>
+</p>
+
+<p>
+	<a href="add_mgr.html">新增管理员</a>
+</p>
+
+
+</html>
+
